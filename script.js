@@ -43,10 +43,20 @@ class VMApp {
     }
 
     async initComponents() {
-        // Initialize Pyodide for Python VMs
-        window.pyodide = await loadPyodide({
-            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
-        });
+        try {
+            // Initialize Pyodide for Python VMs
+            if (typeof loadPyodide === 'function') {
+                window.pyodide = await loadPyodide({
+                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
+                });
+                this.logSystem("Pyodide initialized successfully");
+            } else {
+                this.logSystem("Pyodide not available - Python VMs will use basic interpreter");
+            }
+        } catch (error) {
+            console.warn("Failed to initialize Pyodide:", error);
+            this.logSystem("Python VMs will use basic interpreter");
+        }
         
         // Initialize VM Manager
         this.vmManager = new VMManager(this);
@@ -98,31 +108,45 @@ class VMApp {
         });
 
         // Quick actions
-        document.getElementById('createQuickVM').addEventListener('click', () => {
-            this.showVMCreation();
-        });
+        const createQuickVM = document.getElementById('createQuickVM');
+        if (createQuickVM) {
+            createQuickVM.addEventListener('click', () => {
+                this.showVMCreation();
+            });
+        }
 
-        document.getElementById('createFirstVM').addEventListener('click', () => {
-            this.showVMCreation();
-        });
+        const createFirstVM = document.getElementById('createFirstVM');
+        if (createFirstVM) {
+            createFirstVM.addEventListener('click', () => {
+                this.showVMCreation();
+            });
+        }
 
-        document.getElementById('createNewVM').addEventListener('click', () => {
-            this.showVMCreation();
-        });
+        const createNewVM = document.getElementById('createNewVM');
+        if (createNewVM) {
+            createNewVM.addEventListener('click', () => {
+                this.showVMCreation();
+            });
+        }
 
         // Back to dashboard
-        document.getElementById('backToDashboard').addEventListener('click', () => {
-            this.stopCurrentVM();
-            this.showScreen('dashboard');
-        });
+        const backToDashboard = document.getElementById('backToDashboard');
+        if (backToDashboard) {
+            backToDashboard.addEventListener('click', () => {
+                this.stopCurrentVM();
+                this.showScreen('dashboard');
+            });
+        }
 
         // VM Creation Modal
         const modal = document.getElementById('vmCreationModal');
-        const closeBtn = modal.querySelector('.close-modal');
+        const closeBtn = modal ? modal.querySelector('.close-modal') : null;
         
-        closeBtn.addEventListener('click', () => {
-            modal.classList.remove('active');
-        });
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+        }
 
         // Type selection
         document.querySelectorAll('.type-option').forEach(option => {
@@ -137,21 +161,27 @@ class VMApp {
         const prevBtn = document.getElementById('prevStep');
         const createBtn = document.getElementById('createVM');
 
-        nextBtn.addEventListener('click', () => {
-            if (this.validateStep(currentStep)) {
-                currentStep++;
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (this.validateStep(currentStep)) {
+                    currentStep++;
+                    this.showCreationStep(currentStep);
+                }
+            });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                currentStep--;
                 this.showCreationStep(currentStep);
-            }
-        });
+            });
+        }
 
-        prevBtn.addEventListener('click', () => {
-            currentStep--;
-            this.showCreationStep(currentStep);
-        });
-
-        createBtn.addEventListener('click', () => {
-            this.createVMFromModal();
-        });
+        if (createBtn) {
+            createBtn.addEventListener('click', () => {
+                this.createVMFromModal();
+            });
+        }
 
         // Template buttons
         document.querySelectorAll('.use-template').forEach(btn => {
@@ -161,26 +191,41 @@ class VMApp {
         });
 
         // Settings
-        document.getElementById('saveSettings').addEventListener('click', () => {
-            this.saveSettings();
-        });
+        const saveSettingsBtn = document.getElementById('saveSettings');
+        if (saveSettingsBtn) {
+            saveSettingsBtn.addEventListener('click', () => {
+                this.saveSettings();
+            });
+        }
 
-        document.getElementById('themeSelect').addEventListener('change', (e) => {
-            this.setTheme(e.target.value);
-        });
+        const themeSelect = document.getElementById('themeSelect');
+        if (themeSelect) {
+            themeSelect.addEventListener('change', (e) => {
+                this.setTheme(e.target.value);
+            });
+        }
 
         // VM Screen controls
-        document.getElementById('powerVM').addEventListener('click', () => {
-            this.toggleVMPower();
-        });
+        const powerBtn = document.getElementById('powerVM');
+        if (powerBtn) {
+            powerBtn.addEventListener('click', () => {
+                this.toggleVMPower();
+            });
+        }
 
-        document.getElementById('restartVM').addEventListener('click', () => {
-            this.restartVM();
-        });
+        const restartBtn = document.getElementById('restartVM');
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => {
+                this.restartVM();
+            });
+        }
 
-        document.getElementById('saveVM').addEventListener('click', () => {
-            this.saveVMState();
-        });
+        const saveVMBtn = document.getElementById('saveVM');
+        if (saveVMBtn) {
+            saveVMBtn.addEventListener('click', () => {
+                this.saveVMState();
+            });
+        }
 
         // Console tabs
         document.querySelectorAll('.console-tab').forEach(tab => {
@@ -191,32 +236,48 @@ class VMApp {
 
         // Terminal input
         const terminalInput = document.getElementById('terminalInput');
-        terminalInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                this.sendTerminalCommand();
-            }
-        });
+        if (terminalInput) {
+            terminalInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    this.sendTerminalCommand();
+                }
+            });
+        }
 
-        document.getElementById('sendCommand').addEventListener('click', () => {
-            this.sendTerminalCommand();
-        });
+        const sendCommandBtn = document.getElementById('sendCommand');
+        if (sendCommandBtn) {
+            sendCommandBtn.addEventListener('click', () => {
+                this.sendTerminalCommand();
+            });
+        }
 
         // Quick commands
         document.querySelectorAll('.cmd-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                terminalInput.value = btn.dataset.command;
-                this.sendTerminalCommand();
+                if (terminalInput) {
+                    terminalInput.value = btn.dataset.command;
+                    this.sendTerminalCommand();
+                }
             });
         });
 
         // Output controls
-        document.getElementById('clearOutput').addEventListener('click', () => {
-            this.clearOutputLog();
-        });
+        const clearOutputBtn = document.getElementById('clearOutput');
+        if (clearOutputBtn) {
+            clearOutputBtn.addEventListener('click', () => {
+                this.clearOutputLog();
+            });
+        }
 
-        document.getElementById('copyOutput').addEventListener('click', () => {
-            this.copyOutputLog();
-        });
+        const copyOutputBtn = document.getElementById('copyOutput');
+        if (copyOutputBtn) {
+            copyOutputBtn.addEventListener('click', () => {
+                this.copyOutputLog();
+            });
+        }
+
+        // Range inputs
+        this.setupRangeInputs();
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
@@ -226,8 +287,9 @@ class VMApp {
             }
             
             // Escape to clear input
-            if (e.key === 'Escape') {
+            if (e.key === 'Escape' && terminalInput) {
                 terminalInput.value = '';
+                terminalInput.focus();
             }
         });
 
@@ -239,17 +301,88 @@ class VMApp {
                 this.saveAllVMStates();
             }
         });
+
+        // Settings reset
+        const resetSettingsBtn = document.getElementById('resetSettings');
+        if (resetSettingsBtn) {
+            resetSettingsBtn.addEventListener('click', () => {
+                this.resetSettings();
+            });
+        }
+    }
+
+    setupRangeInputs() {
+        // Linux RAM
+        const linuxRam = document.getElementById('linuxRam');
+        const linuxRamValue = document.getElementById('linuxRamValue');
+        if (linuxRam && linuxRamValue) {
+            linuxRam.addEventListener('input', (e) => {
+                linuxRamValue.textContent = `${e.target.value} MB`;
+            });
+            linuxRamValue.textContent = `${linuxRam.value} MB`;
+        }
+
+        // Linux Storage
+        const linuxStorage = document.getElementById('linuxStorage');
+        const linuxStorageValue = document.getElementById('linuxStorageValue');
+        if (linuxStorage && linuxStorageValue) {
+            linuxStorage.addEventListener('input', (e) => {
+                linuxStorageValue.textContent = `${e.target.value} MB`;
+            });
+            linuxStorageValue.textContent = `${linuxStorage.value} MB`;
+        }
+
+        // JS RAM
+        const jsRam = document.getElementById('jsRam');
+        const jsRamValue = document.getElementById('jsRamValue');
+        if (jsRam && jsRamValue) {
+            jsRam.addEventListener('input', (e) => {
+                jsRamValue.textContent = `${e.target.value} MB`;
+            });
+            jsRamValue.textContent = `${jsRam.value} MB`;
+        }
+
+        // Python RAM
+        const pythonRam = document.getElementById('pythonRam');
+        const pythonRamValue = document.getElementById('pythonRamValue');
+        if (pythonRam && pythonRamValue) {
+            pythonRam.addEventListener('input', (e) => {
+                pythonRamValue.textContent = `${e.target.value} MB`;
+            });
+            pythonRamValue.textContent = `${pythonRam.value} MB`;
+        }
+
+        // Font size
+        const fontSize = document.getElementById('fontSize');
+        const fontSizeValue = document.getElementById('fontSizeValue');
+        if (fontSize && fontSizeValue) {
+            fontSize.addEventListener('input', (e) => {
+                fontSizeValue.textContent = `${e.target.value}px`;
+                document.documentElement.style.fontSize = `${e.target.value}px`;
+            });
+        }
+
+        // Max RAM
+        const maxRam = document.getElementById('maxRam');
+        const maxRamValue = document.getElementById('maxRamValue');
+        if (maxRam && maxRamValue) {
+            maxRam.addEventListener('input', (e) => {
+                maxRamValue.textContent = `${e.target.value} MB`;
+            });
+        }
     }
 
     showVMCreation() {
         const modal = document.getElementById('vmCreationModal');
-        modal.classList.add('active');
-        
-        // Reset to step 1
-        this.showCreationStep(1);
-        
-        // Select Linux by default
-        this.selectVMType('linux');
+        if (modal) {
+            modal.classList.add('active');
+            
+            // Reset to step 1
+            this.showCreationStep(1);
+            
+            // Select Linux by default
+            this.selectVMType('linux');
+        }
     }
 
     selectVMType(type) {
@@ -295,9 +428,9 @@ class VMApp {
         const nextBtn = document.getElementById('nextStep');
         const createBtn = document.getElementById('createVM');
         
-        prevBtn.style.display = step === 1 ? 'none' : 'flex';
-        nextBtn.style.display = step === 3 ? 'none' : 'flex';
-        createBtn.style.display = step === 3 ? 'flex' : 'none';
+        if (prevBtn) prevBtn.style.display = step === 1 ? 'none' : 'flex';
+        if (nextBtn) nextBtn.style.display = step === 3 ? 'none' : 'flex';
+        if (createBtn) createBtn.style.display = step === 3 ? 'flex' : 'none';
         
         // Update review on step 3
         if (step === 3) {
@@ -316,7 +449,7 @@ class VMApp {
         }
         
         if (step === 2) {
-            const vmName = document.getElementById('vmName').value.trim();
+            const vmName = document.getElementById('vmName')?.value.trim();
             if (!vmName) {
                 this.showToast('Please enter a VM name', 'warning');
                 return false;
@@ -340,72 +473,90 @@ class VMApp {
             type = document.querySelector('.type-option.active')?.dataset.type;
         }
         
-        document.getElementById('reviewType').textContent = 
-            type === 'linux' ? 'Linux VM' : 
-            type === 'javascript' ? 'JavaScript VM' : 
-            'Python VM';
+        const reviewType = document.getElementById('reviewType');
+        if (reviewType) {
+            reviewType.textContent = 
+                type === 'linux' ? 'Linux VM' : 
+                type === 'javascript' ? 'JavaScript VM' : 
+                'Python VM';
+        }
         
-        document.getElementById('reviewName').textContent = 
-            document.getElementById('vmName').value || 'my-vm-1';
+        const reviewName = document.getElementById('reviewName');
+        if (reviewName) {
+            reviewName.textContent = 
+                document.getElementById('vmName')?.value || 'my-vm-1';
+        }
         
         if (type === 'linux') {
-            const ram = document.getElementById('linuxRamValue').textContent;
-            const storage = document.getElementById('linuxStorageValue').textContent;
-            const distro = document.getElementById('linuxDistro').selectedOptions[0].text;
+            const ram = document.getElementById('linuxRamValue')?.textContent || '256 MB';
+            const storage = document.getElementById('linuxStorageValue')?.textContent || '500 MB';
+            const distro = document.getElementById('linuxDistro')?.selectedOptions[0]?.text || 'Alpine Linux (5MB)';
             
-            document.getElementById('reviewRam').textContent = ram;
-            document.getElementById('reviewStorage').textContent = storage;
-            document.getElementById('reviewConfig').textContent = distro;
+            const reviewRam = document.getElementById('reviewRam');
+            const reviewStorage = document.getElementById('reviewStorage');
+            const reviewConfig = document.getElementById('reviewConfig');
+            
+            if (reviewRam) reviewRam.textContent = ram;
+            if (reviewStorage) reviewStorage.textContent = storage;
+            if (reviewConfig) reviewConfig.textContent = distro;
         } else if (type === 'javascript') {
-            const ram = document.getElementById('jsRamValue').textContent;
-            const version = document.getElementById('jsVersion').selectedOptions[0].text;
+            const ram = document.getElementById('jsRamValue')?.textContent || '128 MB';
+            const version = document.getElementById('jsVersion')?.selectedOptions[0]?.text || 'Node.js 18 LTS';
             
-            document.getElementById('reviewRam').textContent = ram;
-            document.getElementById('reviewStorage').textContent = 'N/A';
-            document.getElementById('reviewConfig').textContent = version;
+            const reviewRam = document.getElementById('reviewRam');
+            const reviewStorage = document.getElementById('reviewStorage');
+            const reviewConfig = document.getElementById('reviewConfig');
+            
+            if (reviewRam) reviewRam.textContent = ram;
+            if (reviewStorage) reviewStorage.textContent = 'N/A';
+            if (reviewConfig) reviewConfig.textContent = version;
         } else if (type === 'python') {
-            const ram = document.getElementById('pythonRamValue').textContent;
-            const version = document.getElementById('pythonVersion').selectedOptions[0].text;
+            const ram = document.getElementById('pythonRamValue')?.textContent || '128 MB';
+            const version = document.getElementById('pythonVersion')?.selectedOptions[0]?.text || 'Python 3.11';
             
-            document.getElementById('reviewRam').textContent = ram;
-            document.getElementById('reviewStorage').textContent = 'N/A';
-            document.getElementById('reviewConfig').textContent = version;
+            const reviewRam = document.getElementById('reviewRam');
+            const reviewStorage = document.getElementById('reviewStorage');
+            const reviewConfig = document.getElementById('reviewConfig');
+            
+            if (reviewRam) reviewRam.textContent = ram;
+            if (reviewStorage) reviewStorage.textContent = 'N/A';
+            if (reviewConfig) reviewConfig.textContent = version;
         }
     }
 
     async createVMFromModal() {
         const modal = document.getElementById('vmCreationModal');
-        const type = document.querySelector('.type-option.active').dataset.type;
-        const name = document.getElementById('vmName').value.trim();
+        const type = document.querySelector('.type-option.active')?.dataset.type;
+        const name = document.getElementById('vmName')?.value.trim() || 'my-vm-1';
         
         let config = {};
         
         if (type === 'linux') {
             config = {
                 type: 'linux',
-                distro: document.getElementById('linuxDistro').value,
-                ram: parseInt(document.getElementById('linuxRam').value),
-                storage: parseInt(document.getElementById('linuxStorage').value),
+                distro: document.getElementById('linuxDistro')?.value || 'alpine',
+                ram: parseInt(document.getElementById('linuxRam')?.value || '256'),
+                storage: parseInt(document.getElementById('linuxStorage')?.value || '500'),
                 network: true
             };
         } else if (type === 'javascript') {
             config = {
                 type: 'javascript',
-                version: document.getElementById('jsVersion').value,
-                ram: parseInt(document.getElementById('jsRam').value),
-                packages: document.getElementById('jsPackages').value.split(',').map(p => p.trim())
+                version: document.getElementById('jsVersion')?.value || '18',
+                ram: parseInt(document.getElementById('jsRam')?.value || '128'),
+                packages: document.getElementById('jsPackages')?.value.split(',').map(p => p.trim()).filter(p => p) || []
             };
         } else if (type === 'python') {
             config = {
                 type: 'python',
-                version: document.getElementById('pythonVersion').value,
-                ram: parseInt(document.getElementById('pythonRam').value),
-                packages: document.getElementById('pythonPackages').value.split(',').map(p => p.trim())
+                version: document.getElementById('pythonVersion')?.value || '3.11',
+                ram: parseInt(document.getElementById('pythonRam')?.value || '128'),
+                packages: document.getElementById('pythonPackages')?.value.split(',').map(p => p.trim()).filter(p => p) || []
             };
         }
         
         // Close modal
-        modal.classList.remove('active');
+        if (modal) modal.classList.remove('active');
         
         // Create VM
         const vm = await this.createVM(name, config);
@@ -440,6 +591,7 @@ class VMApp {
         // Update dashboard
         this.updateRecentVMs();
         this.updateVMList();
+        this.updateDashboardStats();
         
         this.showToast(`VM "${name}" created successfully`, 'success');
         
@@ -448,20 +600,30 @@ class VMApp {
 
     async openVM(vmId) {
         const vm = this.vmInstances.get(vmId);
-        if (!vm) return;
+        if (!vm) {
+            this.showToast('VM not found', 'error');
+            return;
+        }
         
         // Update last opened
         vm.lastOpened = new Date().toISOString();
         
         // Update UI
-        document.getElementById('currentVMName').textContent = vm.name;
-        document.getElementById('vmInfoType').textContent = 
-            vm.type === 'linux' ? 'Linux VM' : 
-            vm.type === 'javascript' ? 'JavaScript VM' : 
-            'Python VM';
+        const currentVMName = document.getElementById('currentVMName');
+        if (currentVMName) currentVMName.textContent = vm.name;
         
-        document.getElementById('vmInfoCreated').textContent = 
-            new Date(vm.createdAt).toLocaleDateString();
+        const vmInfoType = document.getElementById('vmInfoType');
+        if (vmInfoType) {
+            vmInfoType.textContent = 
+                vm.type === 'linux' ? 'Linux VM' : 
+                vm.type === 'javascript' ? 'JavaScript VM' : 
+                'Python VM';
+        }
+        
+        const vmInfoCreated = document.getElementById('vmInfoCreated');
+        if (vmInfoCreated) {
+            vmInfoCreated.textContent = new Date(vm.createdAt).toLocaleDateString();
+        }
         
         // Clear terminal and output
         this.clearTerminal();
@@ -483,7 +645,8 @@ class VMApp {
         
         // Update status
         this.updateVMStatus('starting');
-        this.logOutput('Starting virtual machine...', 'info');
+        this.addTerminalLine('Starting virtual machine...', 'welcome');
+        this.logSystem(`Starting ${vm.name} (${vm.type} VM)`);
         
         try {
             // Create appropriate VM instance
@@ -496,11 +659,13 @@ class VMApp {
             }
             
             this.updateVMStatus('running');
-            this.logOutput('Virtual machine started successfully', 'success');
+            this.addTerminalLine('Virtual machine started successfully', 'info');
+            this.logSystem(`${vm.name} started successfully`);
             
         } catch (error) {
             this.updateVMStatus('error');
-            this.logOutput(`Failed to start VM: ${error.message}`, 'error');
+            this.addTerminalLine(`Failed to start VM: ${error.message}`, 'error');
+            this.logSystem(`Failed to start ${vm.name}: ${error.message}`, 'error');
             console.error('VM start error:', error);
         }
     }
@@ -517,29 +682,46 @@ class VMApp {
         const statusText = document.getElementById('vmStatusText');
         const connectionStatus = document.querySelector('#connectionStatus span');
         
-        statusIcon.className = 'fas fa-circle';
-        statusText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-        connectionStatus.textContent = status;
+        if (statusIcon) {
+            statusIcon.className = 'fas fa-circle';
+        }
+        
+        if (statusText) {
+            statusText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        }
+        
+        if (connectionStatus) {
+            connectionStatus.textContent = status;
+        }
         
         switch(status) {
             case 'starting':
-                statusIcon.style.color = 'var(--warning-color)';
+                if (statusIcon) statusIcon.style.color = 'var(--warning-color)';
                 break;
             case 'running':
-                statusIcon.style.color = 'var(--success-color)';
+                if (statusIcon) {
+                    statusIcon.style.color = 'var(--success-color)';
+                    statusIcon.classList.add('pulse');
+                }
                 break;
             case 'stopped':
-                statusIcon.style.color = 'var(--text-muted)';
+                if (statusIcon) {
+                    statusIcon.style.color = 'var(--text-muted)';
+                    statusIcon.classList.remove('pulse');
+                }
                 break;
             case 'error':
-                statusIcon.style.color = 'var(--danger-color)';
+                if (statusIcon) {
+                    statusIcon.style.color = 'var(--danger-color)';
+                    statusIcon.classList.remove('pulse');
+                }
                 break;
         }
     }
 
     async sendTerminalCommand() {
         const input = document.getElementById('terminalInput');
-        const command = input.value.trim();
+        const command = input?.value.trim();
         
         if (!command || !this.currentVM) return;
         
@@ -547,7 +729,7 @@ class VMApp {
         this.addTerminalLine(`$ ${command}`, 'command');
         
         // Clear input
-        input.value = '';
+        if (input) input.value = '';
         
         // Process command
         try {
@@ -559,19 +741,21 @@ class VMApp {
                 }
                 
                 // Log successful command
-                this.logOutput(`Command executed: ${command}`, 'info');
+                this.logSystem(`Command executed: ${command}`, 'info');
             } else {
                 this.addTerminalLine(`Error: ${result.error}`, 'error');
-                this.logOutput(`Command failed: ${command} - ${result.error}`, 'error');
+                this.logSystem(`Command failed: ${command} - ${result.error}`, 'error');
             }
         } catch (error) {
             this.addTerminalLine(`Error: ${error.message}`, 'error');
-            this.logOutput(`Command error: ${error.message}`, 'error');
+            this.logSystem(`Command error: ${error.message}`, 'error');
         }
     }
 
     addTerminalLine(text, type = 'info') {
         const output = document.getElementById('terminalOutput');
+        if (!output) return;
+        
         const line = document.createElement('div');
         line.className = `terminal-line ${type}`;
         
@@ -585,8 +769,10 @@ class VMApp {
         output.scrollTop = output.scrollHeight;
     }
 
-    logOutput(message, level = 'info') {
+    logSystem(message, level = 'info') {
         const output = document.getElementById('outputLog');
+        if (!output) return;
+        
         const log = document.createElement('div');
         log.className = `log-entry ${level}`;
         
@@ -608,21 +794,27 @@ class VMApp {
     }
 
     clearTerminal() {
-        document.getElementById('terminalOutput').innerHTML = '';
+        const terminalOutput = document.getElementById('terminalOutput');
+        if (terminalOutput) terminalOutput.innerHTML = '';
     }
 
     clearOutputLog() {
-        document.getElementById('outputLog').innerHTML = '';
+        const outputLog = document.getElementById('outputLog');
+        if (outputLog) outputLog.innerHTML = '';
     }
 
     copyOutputLog() {
         const log = document.getElementById('outputLog');
+        if (!log) return;
+        
         const text = Array.from(log.children)
             .map(line => line.textContent)
             .join('\n');
         
         navigator.clipboard.writeText(text).then(() => {
             this.showToast('Output copied to clipboard', 'success');
+        }).catch(err => {
+            console.error('Failed to copy:', err);
         });
     }
 
@@ -645,7 +837,10 @@ class VMApp {
         
         // Enable/disable terminal input
         const terminalInput = document.getElementById('terminalInput');
-        terminalInput.disabled = tabName !== 'terminal';
+        if (terminalInput) {
+            terminalInput.disabled = tabName !== 'terminal';
+            if (tabName === 'terminal') terminalInput.focus();
+        }
     }
 
     startVMMonitoring(vmId) {
@@ -673,22 +868,29 @@ class VMApp {
         const memoryUsed = Math.floor(vm.config.ram * 0.3 + Math.random() * vm.config.ram * 0.2);
         
         // Update display
-        document.getElementById('cpuUsage').textContent = `${cpuUsage}%`;
-        document.querySelector('.cpu-fill').style.width = `${cpuUsage}%`;
+        const cpuUsageElement = document.getElementById('cpuUsage');
+        const cpuFill = document.querySelector('.cpu-fill');
+        if (cpuUsageElement) cpuUsageElement.textContent = `${cpuUsage}%`;
+        if (cpuFill) cpuFill.style.width = `${cpuUsage}%`;
         
-        document.getElementById('memoryUsage').textContent = `${memoryUsed}/${vm.config.ram} MB`;
-        document.querySelector('.memory-fill').style.width = `${(memoryUsed / vm.config.ram) * 100}%`;
+        const memoryUsageElement = document.getElementById('memoryUsage');
+        const memoryFill = document.querySelector('.memory-fill');
+        if (memoryUsageElement) memoryUsageElement.textContent = `${memoryUsed}/${vm.config.ram} MB`;
+        if (memoryFill) memoryFill.style.width = `${(memoryUsed / vm.config.ram) * 100}%`;
         
         if (vm.type === 'linux') {
             const storageUsed = Math.floor(vm.config.storage * 0.4 + Math.random() * vm.config.storage * 0.1);
-            document.getElementById('storageUsage').textContent = `${storageUsed}/${vm.config.storage} MB`;
-            document.querySelector('.storage-fill').style.width = `${(storageUsed / vm.config.storage) * 100}%`;
+            const storageUsageElement = document.getElementById('storageUsage');
+            const storageFill = document.querySelector('.storage-fill');
+            if (storageUsageElement) storageUsageElement.textContent = `${storageUsed}/${vm.config.storage} MB`;
+            if (storageFill) storageFill.style.width = `${(storageUsed / vm.config.storage) * 100}%`;
         }
         
         // Update uptime
         if (vm.lastOpened) {
             const uptime = Math.floor((Date.now() - new Date(vm.lastOpened).getTime()) / 1000);
-            document.getElementById('vmInfoUptime').textContent = `${this.formatUptime(uptime)}`;
+            const vmInfoUptime = document.getElementById('vmInfoUptime');
+            if (vmInfoUptime) vmInfoUptime.textContent = `${this.formatUptime(uptime)}`;
         }
     }
 
@@ -703,7 +905,10 @@ class VMApp {
     }
 
     toggleVMPower() {
-        if (!this.currentVM) return;
+        if (!this.currentVM) {
+            this.showToast('No VM selected', 'warning');
+            return;
+        }
         
         const vm = this.vmInstances.get(this.currentVM);
         if (vm.status === 'running') {
@@ -717,22 +922,22 @@ class VMApp {
         if (!this.currentVM) return;
         
         this.updateVMStatus('stopping');
-        this.logOutput('Stopping virtual machine...', 'info');
+        this.addTerminalLine('Stopping virtual machine...', 'info');
         
         try {
             await this.vmManager.stopVM(this.currentVM);
             this.updateVMStatus('stopped');
-            this.logOutput('Virtual machine stopped', 'info');
+            this.addTerminalLine('Virtual machine stopped', 'info');
         } catch (error) {
             this.updateVMStatus('error');
-            this.logOutput(`Failed to stop VM: ${error.message}`, 'error');
+            this.addTerminalLine(`Failed to stop VM: ${error.message}`, 'error');
         }
     }
 
     restartVM() {
         if (!this.currentVM) return;
         
-        this.logOutput('Restarting virtual machine...', 'info');
+        this.addTerminalLine('Restarting virtual machine...', 'info');
         
         setTimeout(() => {
             const vm = this.vmInstances.get(this.currentVM);
@@ -743,11 +948,11 @@ class VMApp {
     saveVMState() {
         if (!this.currentVM) return;
         
-        this.logOutput('Saving VM state...', 'info');
+        this.addTerminalLine('Saving VM state...', 'info');
         
         // In a real app, this would save the VM state
         setTimeout(() => {
-            this.logOutput('VM state saved successfully', 'success');
+            this.addTerminalLine('VM state saved successfully', 'success');
             this.showToast('VM state saved', 'success');
         }, 1000);
     }
@@ -759,19 +964,25 @@ class VMApp {
             .filter(vm => vm.status === 'running').length;
         
         // Update UI
-        document.getElementById('availableRam').textContent = 
-            `${2048 - (runningVMs * 256)} MB`;
+        const availableRam = document.getElementById('availableRam');
+        if (availableRam) {
+            availableRam.textContent = `${2048 - (runningVMs * 256)} MB`;
+        }
         
         const totalStorage = Array.from(this.vmInstances.values())
             .filter(vm => vm.type === 'linux')
             .reduce((sum, vm) => sum + (vm.config.storage || 0), 0);
         
-        document.getElementById('availableStorage').textContent = 
-            `${1000 - totalStorage} MB`;
+        const availableStorage = document.getElementById('availableStorage');
+        if (availableStorage) {
+            availableStorage.textContent = `${1000 - totalStorage} MB`;
+        }
     }
 
     updateRecentVMs() {
         const recentList = document.getElementById('recentVMList');
+        if (!recentList) return;
+        
         const vms = Array.from(this.vmInstances.values())
             .sort((a, b) => new Date(b.lastOpened || b.createdAt) - new Date(a.lastOpened || a.createdAt))
             .slice(0, 3);
@@ -786,6 +997,14 @@ class VMApp {
                     </button>
                 </div>
             `;
+            
+            const createFirstVM = document.getElementById('createFirstVM');
+            if (createFirstVM) {
+                createFirstVM.addEventListener('click', () => {
+                    this.showVMCreation();
+                });
+            }
+            
             return;
         }
         
@@ -820,6 +1039,8 @@ class VMApp {
 
     updateVMList() {
         const vmList = document.getElementById('vmList');
+        if (!vmList) return;
+        
         const vms = Array.from(this.vmInstances.values());
         
         if (vms.length === 0) {
@@ -833,9 +1054,12 @@ class VMApp {
                 </div>
             `;
             
-            document.getElementById('createFromList')?.addEventListener('click', () => {
-                this.showVMCreation();
-            });
+            const createFromList = document.getElementById('createFromList');
+            if (createFromList) {
+                createFromList.addEventListener('click', () => {
+                    this.showVMCreation();
+                });
+            }
             
             return;
         }
@@ -943,6 +1167,14 @@ class VMApp {
                     network: false
                 };
                 break;
+            default:
+                config = {
+                    type: 'linux',
+                    distro: 'alpine',
+                    ram: 256,
+                    storage: 500,
+                    network: true
+                };
         }
         
         this.createVM(`${template}-vm`, config);
@@ -950,34 +1182,93 @@ class VMApp {
 
     saveSettings() {
         const settings = {
-            theme: document.getElementById('themeSelect').value,
-            fontSize: document.getElementById('fontSize').value,
-            maxRam: document.getElementById('maxRam').value,
-            autoSave: document.getElementById('autoSave').checked,
-            enableSandbox: document.getElementById('enableSandbox').checked,
-            clearConsole: document.getElementById('clearConsole').checked
+            theme: document.getElementById('themeSelect')?.value || 'dark',
+            fontSize: document.getElementById('fontSize')?.value || 14,
+            maxRam: document.getElementById('maxRam')?.value || 1024,
+            autoSave: document.getElementById('autoSave')?.checked || false,
+            enableSandbox: document.getElementById('enableSandbox')?.checked || false,
+            clearConsole: document.getElementById('clearConsole')?.checked || false
         };
         
         localStorage.setItem('vm_app_settings', JSON.stringify(settings));
         this.showToast('Settings saved successfully', 'success');
     }
 
+    resetSettings() {
+        if (confirm('Reset all settings to defaults?')) {
+            localStorage.removeItem('vm_app_settings');
+            
+            // Reset UI elements
+            const themeSelect = document.getElementById('themeSelect');
+            if (themeSelect) themeSelect.value = 'dark';
+            
+            const fontSize = document.getElementById('fontSize');
+            const fontSizeValue = document.getElementById('fontSizeValue');
+            if (fontSize && fontSizeValue) {
+                fontSize.value = 14;
+                fontSizeValue.textContent = '14px';
+                document.documentElement.style.fontSize = '14px';
+            }
+            
+            const maxRam = document.getElementById('maxRam');
+            const maxRamValue = document.getElementById('maxRamValue');
+            if (maxRam && maxRamValue) {
+                maxRam.value = 1024;
+                maxRamValue.textContent = '1024 MB';
+            }
+            
+            const autoSave = document.getElementById('autoSave');
+            if (autoSave) autoSave.checked = false;
+            
+            const enableSandbox = document.getElementById('enableSandbox');
+            if (enableSandbox) enableSandbox.checked = false;
+            
+            const clearConsole = document.getElementById('clearConsole');
+            if (clearConsole) clearConsole.checked = false;
+            
+            this.setTheme('dark');
+            this.showToast('Settings reset to defaults', 'success');
+        }
+    }
+
     loadSavedData() {
         // Load settings
         const savedSettings = localStorage.getItem('vm_app_settings');
         if (savedSettings) {
-            const settings = JSON.parse(savedSettings);
-            
-            document.getElementById('themeSelect').value = settings.theme || 'dark';
-            document.getElementById('fontSize').value = settings.fontSize || 14;
-            document.getElementById('fontSizeValue').textContent = `${settings.fontSize || 14}px`;
-            document.getElementById('maxRam').value = settings.maxRam || 1024;
-            document.getElementById('maxRamValue').textContent = `${settings.maxRam || 1024} MB`;
-            document.getElementById('autoSave').checked = settings.autoSave !== false;
-            document.getElementById('enableSandbox').checked = settings.enableSandbox !== false;
-            document.getElementById('clearConsole').checked = settings.clearConsole !== false;
-            
-            this.setTheme(settings.theme || 'dark');
+            try {
+                const settings = JSON.parse(savedSettings);
+                
+                const themeSelect = document.getElementById('themeSelect');
+                if (themeSelect) themeSelect.value = settings.theme || 'dark';
+                
+                const fontSize = document.getElementById('fontSize');
+                const fontSizeValue = document.getElementById('fontSizeValue');
+                if (fontSize && fontSizeValue) {
+                    fontSize.value = settings.fontSize || 14;
+                    fontSizeValue.textContent = `${settings.fontSize || 14}px`;
+                    document.documentElement.style.fontSize = `${settings.fontSize || 14}px`;
+                }
+                
+                const maxRam = document.getElementById('maxRam');
+                const maxRamValue = document.getElementById('maxRamValue');
+                if (maxRam && maxRamValue) {
+                    maxRam.value = settings.maxRam || 1024;
+                    maxRamValue.textContent = `${settings.maxRam || 1024} MB`;
+                }
+                
+                const autoSave = document.getElementById('autoSave');
+                if (autoSave) autoSave.checked = settings.autoSave !== false;
+                
+                const enableSandbox = document.getElementById('enableSandbox');
+                if (enableSandbox) enableSandbox.checked = settings.enableSandbox !== false;
+                
+                const clearConsole = document.getElementById('clearConsole');
+                if (clearConsole) clearConsole.checked = settings.clearConsole !== false;
+                
+                this.setTheme(settings.theme || 'dark');
+            } catch (e) {
+                console.error('Error loading settings:', e);
+            }
         }
         
         // Load VMs
@@ -1024,9 +1315,27 @@ class VMApp {
     }
 
     showToast(message, type = 'info') {
+        // Remove existing toasts
+        document.querySelectorAll('.toast').forEach(toast => toast.remove());
+        
         const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
+        toast.className = `toast`;
         toast.textContent = message;
+        
+        // Add color based on type
+        switch(type) {
+            case 'success':
+                toast.style.borderLeftColor = 'var(--success-color)';
+                break;
+            case 'warning':
+                toast.style.borderLeftColor = 'var(--warning-color)';
+                break;
+            case 'error':
+                toast.style.borderLeftColor = 'var(--danger-color)';
+                break;
+            default:
+                toast.style.borderLeftColor = 'var(--info-color)';
+        }
         
         document.body.appendChild(toast);
         
@@ -1045,136 +1354,178 @@ class VMManager {
     }
 
     async createLinuxVM(vm) {
-        const config = {
-            wasm_path: "https://copy.sh/v86/build/v86.wasm",
-            memory_size: vm.config.ram * 1024 * 1024,
-            vga_memory_size: 8 * 1024 * 1024,
-            screen_container: document.createElement('div'),
-            bios: { url: "https://copy.sh/v86/build/bios.bin" },
-            vga_bios: { url: "https://copy.sh/v86/build/vgabios.bin" },
-            cdrom: { url: this.getLinuxImage(vm.config.distro) }
-        };
-
-        if (vm.config.network) {
-            config.network_adapter = true;
+        this.app.logSystem(`Creating Linux VM with ${vm.config.ram}MB RAM and ${vm.config.storage}MB storage`, 'info');
+        
+        // Check if v86 is available
+        if (typeof window.V86 === 'undefined') {
+            this.app.logSystem('v86 emulator not loaded. Please check your internet connection.', 'error');
+            throw new Error('v86 emulator not available');
         }
+        
+        try {
+            const config = {
+                wasm_path: "https://copy.sh/v86/wasm/v86.wasm",
+                memory_size: vm.config.ram * 1024 * 1024,
+                vga_memory_size: 2 * 1024 * 1024,
+                screen_container: document.createElement('div'),
+                bios: { url: "https://copy.sh/v86/bios/seabios.bin" },
+                vga_bios: { url: "https://copy.sh/v86/bios/vgabios.bin" },
+                cdrom: { url: this.getLinuxImage(vm.config.distro) },
+                autostart: true
+            };
 
-        return new Promise((resolve, reject) => {
-            try {
-                this.linuxEmulator = new window.V86(config);
-                
-                this.linuxEmulator.add_listener("emulator-ready", () => {
-                    vm.status = 'running';
-                    this.vms.set(vm.id, {
-                        type: 'linux',
-                        emulator: this.linuxEmulator,
-                        vm: vm
-                    });
-                    
-                    // Setup console output
-                    this.linuxEmulator.add_listener("serial0-output-char", (char) => {
-                        this.app.addTerminalLine(char.char || char, 'output');
-                    });
-                    
-                    resolve();
-                });
-                
-                this.linuxEmulator.run();
-            } catch (error) {
-                reject(error);
+            if (vm.config.network) {
+                config.network_adapter = true;
             }
-        });
+
+            this.linuxEmulator = new window.V86(config);
+            
+            const vmInstance = {
+                type: 'linux',
+                emulator: this.linuxEmulator,
+                vm: vm,
+                buffer: ''
+            };
+            
+            this.vms.set(vm.id, vmInstance);
+            
+            // Setup serial output
+            this.linuxEmulator.add_listener("serial0-output-byte", (byte) => {
+                const char = String.fromCharCode(byte);
+                vmInstance.buffer += char;
+                
+                // When we get a newline, output the buffer
+                if (char === '\n' || vmInstance.buffer.length > 100) {
+                    this.app.addTerminalLine(vmInstance.buffer.trim(), 'output');
+                    vmInstance.buffer = '';
+                }
+            });
+            
+            this.app.logSystem('Linux VM emulator initialized', 'success');
+            
+            return vmInstance;
+            
+        } catch (error) {
+            this.app.logSystem(`Failed to create Linux VM: ${error.message}`, 'error');
+            throw error;
+        }
     }
 
     async createJSVM(vm) {
-        // Create a JavaScript VM environment
+        this.app.logSystem(`Creating JavaScript VM with Node.js ${vm.config.version}`, 'info');
+        
         const jsVM = {
             type: 'javascript',
             context: {
                 console: {
                     log: (...args) => {
                         const output = args.map(arg => 
-                            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+                            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
                         ).join(' ');
                         this.app.addTerminalLine(output, 'output');
+                    },
+                    error: (...args) => {
+                        const output = args.map(arg => String(arg)).join(' ');
+                        this.app.addTerminalLine(output, 'error');
+                    },
+                    warn: (...args) => {
+                        const output = args.map(arg => String(arg)).join(' ');
+                        this.app.addTerminalLine(output, 'warning');
                     }
                 },
-                setTimeout: (fn, delay) => setTimeout(fn, delay),
-                setInterval: (fn, delay) => setInterval(fn, delay),
-                clearTimeout: (id) => clearTimeout(id),
-                clearInterval: (id) => clearInterval(id)
+                setTimeout,
+                setInterval,
+                clearTimeout,
+                clearInterval,
+                Math,
+                JSON,
+                Date,
+                Array,
+                Object,
+                String,
+                Number,
+                Boolean,
+                RegExp,
+                Error,
+                Promise
             },
-            vm: vm
+            vm: vm,
+            variables: {}
         };
         
-        // Initialize with basic globals
-        const sandbox = new Proxy(jsVM.context, {
-            has: () => true,
-            get: (target, prop) => {
-                if (prop in target) return target[prop];
-                if (prop === 'window') return sandbox;
-                if (prop === 'global') return sandbox;
-                if (prop === 'globalThis') return sandbox;
-                return undefined;
-            }
-        });
+        // Add some Node.js-like globals
+        jsVM.context.global = jsVM.context;
+        jsVM.context.globalThis = jsVM.context;
+        jsVM.context.process = {
+            env: { NODE_ENV: 'development' },
+            argv: [],
+            version: `v${vm.config.version}.0.0`,
+            versions: { node: vm.config.version },
+            platform: 'browser',
+            cwd: () => '/',
+            exit: () => this.app.logSystem('Process exited', 'info')
+        };
         
-        // Add some common globals
-        sandbox.Math = Math;
-        sandbox.JSON = JSON;
-        sandbox.Date = Date;
+        // Load packages if specified
+        if (vm.config.packages && vm.config.packages.length > 0) {
+            this.app.logSystem(`Loading packages: ${vm.config.packages.join(', ')}`, 'info');
+            
+            // Simulate loading packages
+            vm.config.packages.forEach(pkg => {
+                jsVM.context[pkg] = `Package '${pkg}' would be loaded here`;
+            });
+        }
         
         this.vms.set(vm.id, jsVM);
-        vm.status = 'running';
         
-        this.app.logOutput('JavaScript VM initialized with Node.js-like environment', 'info');
-        this.app.addTerminalLine('JavaScript VM Ready (Node.js-like environment)', 'info');
-        this.app.addTerminalLine('Try: console.log("Hello") or 2 + 2', 'info');
+        this.app.addTerminalLine(`JavaScript VM initialized with Node.js ${vm.config.version}`, 'info');
+        this.app.addTerminalLine('Type JavaScript code to execute it', 'info');
+        this.app.addTerminalLine('Try: console.log("Hello, World!") or 2 + 2', 'info');
         
         return jsVM;
     }
 
     async createPythonVM(vm) {
-        try {
-            // Initialize Pyodide if not already done
-            if (!window.pyodide) {
-                window.pyodide = await loadPyodide({
-                    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
-                });
-            }
+        this.app.logSystem(`Creating Python VM ${vm.config.version}`, 'info');
+        
+        const pythonVM = {
+            type: 'python',
+            vm: vm,
+            variables: {},
+            history: []
+        };
+        
+        // Check if Pyodide is available
+        if (window.pyodide) {
+            pythonVM.pyodide = window.pyodide;
+            this.app.logSystem('Using Pyodide for Python execution', 'info');
             
-            const pythonVM = {
-                type: 'python',
-                pyodide: window.pyodide,
-                vm: vm
-            };
-            
-            // Load any specified packages
+            // Load packages if specified
             if (vm.config.packages && vm.config.packages.length > 0) {
-                for (const pkg of vm.config.packages) {
-                    if (pkg.trim()) {
-                        this.app.logOutput(`Loading Python package: ${pkg}`, 'info');
-                        try {
+                this.app.logSystem(`Loading Python packages: ${vm.config.packages.join(', ')}`, 'info');
+                
+                try {
+                    for (const pkg of vm.config.packages) {
+                        if (pkg.trim()) {
                             await window.pyodide.loadPackage(pkg.trim());
-                            this.app.logOutput(`Loaded package: ${pkg}`, 'success');
-                        } catch (error) {
-                            this.app.logOutput(`Failed to load package ${pkg}: ${error.message}`, 'warning');
+                            this.app.logSystem(`Loaded package: ${pkg}`, 'success');
                         }
                     }
+                } catch (error) {
+                    this.app.logSystem(`Failed to load some packages: ${error.message}`, 'warning');
                 }
             }
-            
-            this.vms.set(vm.id, pythonVM);
-            vm.status = 'running';
-            
-            this.app.logOutput('Python VM initialized with Pyodide', 'info');
-            this.app.addTerminalLine('Python VM Ready (Python 3.11 via Pyodide)', 'info');
-            this.app.addTerminalLine('Try: print("Hello") or 2 + 2', 'info');
-            
-            return pythonVM;
-        } catch (error) {
-            throw new Error(`Failed to initialize Python VM: ${error.message}`);
+        } else {
+            this.app.logSystem('Pyodide not available, using basic Python interpreter', 'info');
         }
+        
+        this.vms.set(vm.id, pythonVM);
+        
+        this.app.addTerminalLine(`Python VM initialized ${window.pyodide ? 'with Pyodide' : 'with basic interpreter'}`, 'info');
+        this.app.addTerminalLine('Type Python code to execute it', 'info');
+        this.app.addTerminalLine('Try: print("Hello, World!") or 2 + 2', 'info');
+        
+        return pythonVM;
     }
 
     async processCommand(vmId, command) {
@@ -1191,6 +1542,8 @@ class VMManager {
             } else if (vmData.type === 'python') {
                 return await this.processPythonCommand(vmData, command);
             }
+            
+            return { success: false, error: 'Unknown VM type' };
         } catch (error) {
             return { success: false, error: error.message };
         }
@@ -1198,18 +1551,39 @@ class VMManager {
 
     async processLinuxCommand(vmData, command) {
         if (!vmData.emulator) {
-            return { success: false, error: 'Emulator not available' };
+            return { success: false, error: 'Linux emulator not available' };
         }
         
-        // Send command to emulator
-        for (let i = 0; i < command.length; i++) {
-            vmData.emulator.serial0_send(command.charCodeAt(i));
+        try {
+            // Special commands
+            if (command === 'clear') {
+                this.app.clearTerminal();
+                return { success: true };
+            }
+            
+            if (command === 'help') {
+                const help = `
+Available in Linux VM:
+• Basic commands will be sent to the emulator
+• Special: clear, help
+Note: The emulator may take time to boot and respond
+                `.trim();
+                return { success: true, output: help };
+            }
+            
+            // Send command to emulator
+            for (let i = 0; i < command.length; i++) {
+                vmData.emulator.serial0_send(command.charCodeAt(i));
+            }
+            
+            // Send Enter key
+            vmData.emulator.serial0_send(13); // Enter
+            
+            return { success: true, output: 'Command sent to Linux VM' };
+            
+        } catch (error) {
+            return { success: false, error: `Failed to send command: ${error.message}` };
         }
-        
-        // Send Enter key
-        vmData.emulator.serial0_send(13);
-        
-        return { success: true, output: 'Command sent to Linux VM' };
     }
 
     async processJSCommand(vmData, command) {
@@ -1224,11 +1598,13 @@ class VMManager {
             
             if (command === 'help') {
                 const help = `
-Available commands:
-• JavaScript expressions: 2 + 2, Math.PI
-• Console output: console.log("Hello")
-• Variable assignment: let x = 10
-• Functions: function greet() { return "Hello" }
+Available in JavaScript VM:
+• JavaScript expressions: 2 + 2, Math.PI, [1,2,3].map(x => x*2)
+• Console output: console.log("Hello"), console.error("Error")
+• Variable assignment: let x = 10; x * 2
+• Functions: function greet() { return "Hello" }; greet()
+• Object creation: const obj = { name: "test", value: 42 }
+• Array operations: [1,2,3].filter(x => x > 1)
 • Special: clear, help
                 `.trim();
                 return { success: true, output: help };
@@ -1237,43 +1613,44 @@ Available commands:
             // Try to evaluate the command
             let result;
             
-            if (command.trim().startsWith('console.')) {
-                // Direct console command
+            // First try as expression
+            try {
                 const fn = new Function('sandbox', `
                     with(sandbox) {
-                        return (${command});
+                        return eval(${JSON.stringify(command)});
                     }
                 `);
                 result = fn(sandbox);
-            } else {
-                // Try as expression
+            } catch (evalError) {
+                // If eval fails, try as a statement
                 try {
-                    const fn = new Function('sandbox', `
-                        with(sandbox) {
-                            return eval(${JSON.stringify(command)});
-                        }
-                    `);
-                    result = fn(sandbox);
-                } catch (e) {
-                    // Try as statement
                     const fn = new Function('sandbox', `
                         with(sandbox) {
                             ${command}
                         }
                     `);
                     result = fn(sandbox);
+                } catch (statementError) {
+                    return { success: false, error: statementError.message };
                 }
             }
             
             // Handle the result
-            if (result !== undefined) {
-                const output = typeof result === 'object' ? 
-                    JSON.stringify(result, null, 2) : 
-                    String(result);
+            if (result !== undefined && result !== null) {
+                let output;
+                if (typeof result === 'object') {
+                    try {
+                        output = JSON.stringify(result, null, 2);
+                    } catch (e) {
+                        output = result.toString();
+                    }
+                } else {
+                    output = String(result);
+                }
                 return { success: true, output: output };
-            } else {
-                return { success: true };
             }
+            
+            return { success: true };
             
         } catch (error) {
             return { success: false, error: error.message };
@@ -1282,8 +1659,6 @@ Available commands:
 
     async processPythonCommand(vmData, command) {
         try {
-            const pyodide = vmData.pyodide;
-            
             // Special commands
             if (command === 'clear') {
                 this.app.clearTerminal();
@@ -1292,45 +1667,73 @@ Available commands:
             
             if (command === 'help') {
                 const help = `
-Available commands:
-• Python expressions: 2 + 2
-• Print output: print("Hello")
-• Variable assignment: x = 10
-• Import modules: import math
-• Functions: def greet(): return "Hello"
+Available in Python VM:
+• Python expressions: 2 + 2, [x**2 for x in range(5)]
+• Print output: print("Hello"), print(f"Value: {42}")
+• Variable assignment: x = 10; y = 20; x + y
+• Functions: def greet(): return "Hello"; greet()
+• Import modules: import math; math.sqrt(16)
+• List operations: [1,2,3,4,5][1:4]
 • Special: clear, help
                 `.trim();
                 return { success: true, output: help };
             }
             
-            // Execute Python code
             let result;
             
-            if (command.trim().startsWith('print(')) {
-                // Capture print output
-                const code = command;
-                result = await pyodide.runPythonAsync(code);
-            } else {
-                // Try to get a result
+            if (vmData.pyodide) {
+                // Use Pyodide
                 try {
-                    result = await pyodide.runPythonAsync(command);
-                } catch (e) {
-                    // Might be a statement without return
-                    await pyodide.runPythonAsync(command);
-                    result = undefined;
+                    result = await vmData.pyodide.runPythonAsync(command);
+                } catch (pyodideError) {
+                    return { success: false, error: pyodideError.message };
                 }
+            } else {
+                // Basic Python interpreter fallback
+                result = this.processBasicPython(command);
             }
             
             // Handle the result
-            if (result !== undefined) {
+            if (result !== undefined && result !== null) {
                 return { success: true, output: String(result) };
-            } else {
-                return { success: true };
             }
+            
+            return { success: true };
             
         } catch (error) {
             return { success: false, error: error.message };
         }
+    }
+
+    processBasicPython(code) {
+        // Very basic Python interpreter for fallback
+        const lines = code.split('\n');
+        let result = '';
+        
+        for (const line of lines) {
+            const trimmed = line.trim();
+            
+            if (trimmed.startsWith('print(') && trimmed.endsWith(')')) {
+                const content = trimmed.substring(6, trimmed.length - 1);
+                result += eval(content) + '\n';
+            } else if (trimmed.includes('=')) {
+                // Variable assignment
+                const [varName, value] = trimmed.split('=').map(s => s.trim());
+                // Store variable (in a real implementation, you'd track this)
+                result += `${varName} = ${eval(value)}\n`;
+            } else {
+                try {
+                    const evalResult = eval(trimmed);
+                    if (evalResult !== undefined) {
+                        result += String(evalResult) + '\n';
+                    }
+                } catch (e) {
+                    // Ignore eval errors for now
+                }
+            }
+        }
+        
+        return result.trim() || undefined;
     }
 
     stopVM(vmId) {
@@ -1340,6 +1743,7 @@ Available commands:
         if (vmData.type === 'linux' && vmData.emulator) {
             try {
                 vmData.emulator.stop();
+                this.app.logSystem('Linux VM stopped', 'info');
             } catch (error) {
                 console.error('Error stopping Linux VM:', error);
             }
@@ -1363,78 +1767,17 @@ Available commands:
             arch: 'https://github.com/ivandavidov/minimal-linux-images/raw/master/archlinux-buildroot-x86_64.iso'
         };
         
-        return images[distro] || images.debian;
+        return images[distro] || images.alpine;
     }
 }
 
-// Range input handlers
-function setupRangeInputs() {
-    // Linux RAM
-    const linuxRam = document.getElementById('linuxRam');
-    const linuxRamValue = document.getElementById('linuxRamValue');
-    
-    if (linuxRam && linuxRamValue) {
-        linuxRam.addEventListener('input', (e) => {
-            linuxRamValue.textContent = `${e.target.value} MB`;
-        });
-    }
-    
-    // Linux Storage
-    const linuxStorage = document.getElementById('linuxStorage');
-    const linuxStorageValue = document.getElementById('linuxStorageValue');
-    
-    if (linuxStorage && linuxStorageValue) {
-        linuxStorage.addEventListener('input', (e) => {
-            linuxStorageValue.textContent = `${e.target.value} MB`;
-        });
-    }
-    
-    // JS RAM
-    const jsRam = document.getElementById('jsRam');
-    const jsRamValue = document.getElementById('jsRamValue');
-    
-    if (jsRam && jsRamValue) {
-        jsRam.addEventListener('input', (e) => {
-            jsRamValue.textContent = `${e.target.value} MB`;
-        });
-    }
-    
-    // Python RAM
-    const pythonRam = document.getElementById('pythonRam');
-    const pythonRamValue = document.getElementById('pythonRamValue');
-    
-    if (pythonRam && pythonRamValue) {
-        pythonRam.addEventListener('input', (e) => {
-            pythonRamValue.textContent = `${e.target.value} MB`;
-        });
-    }
-    
-    // Settings ranges
-    const fontSize = document.getElementById('fontSize');
-    const fontSizeValue = document.getElementById('fontSizeValue');
-    
-    if (fontSize && fontSizeValue) {
-        fontSize.addEventListener('input', (e) => {
-            fontSizeValue.textContent = `${e.target.value}px`;
-            document.documentElement.style.fontSize = `${e.target.value}px`;
-        });
-    }
-    
-    const maxRam = document.getElementById('maxRam');
-    const maxRamValue = document.getElementById('maxRamValue');
-    
-    if (maxRam && maxRamValue) {
-        maxRam.addEventListener('input', (e) => {
-            maxRamValue.textContent = `${e.target.value} MB`;
-        });
-    }
-}
-
-// Initialize the application
+// Initialize the application when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    // Setup range inputs first
-    setupRangeInputs();
-    
-    // Initialize app
     window.vmApp = new VMApp();
 });
+
+// Export for debugging
+if (typeof window !== 'undefined') {
+    window.VMApp = VMApp;
+    window.VMManager = VMManager;
+}
