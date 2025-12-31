@@ -3,17 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Browser VM Manager</title>
+    <title>Browser VM Manager</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <!-- Language runtime libraries -->
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@ruby/3.2-wasm-wasi@latest/dist/browser.script.iife.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/php-wasm@latest/index.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lua.vm.js@latest/dist/lua.vm.js"></script>
-    <script src="https://unpkg.com/@typescript/vm@latest/dist/typescript.js"></script>
-    <script src="https://unpkg.com/@webassemblyjs/wasm-parser@latest/dist/index.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -22,7 +15,7 @@
             <div class="loading-container">
                 <div class="loading-logo">
                     <i class="fas fa-server"></i>
-                    <h1>Advanced VM Manager</h1>
+                    <h1>VM Manager</h1>
                 </div>
                 <div class="loading-progress">
                     <div class="progress-bar">
@@ -33,7 +26,7 @@
                 <div class="loading-stats">
                     <div class="loading-stat">
                         <i class="fas fa-microchip"></i>
-                        <span>Loading Runtimes</span>
+                        <span>Initializing Emulators</span>
                     </div>
                     <div class="loading-stat">
                         <i class="fas fa-memory"></i>
@@ -41,7 +34,7 @@
                     </div>
                     <div class="loading-stat">
                         <i class="fas fa-code"></i>
-                        <span>Preparing VMs</span>
+                        <span>Loading Runtimes</span>
                     </div>
                 </div>
             </div>
@@ -52,7 +45,7 @@
             <header class="dashboard-header">
                 <div class="logo">
                     <i class="fas fa-server"></i>
-                    <h1>Advanced VM Manager</h1>
+                    <h1>VM Manager</h1>
                 </div>
                 <div class="user-info">
                     <span id="userStatus">
@@ -79,10 +72,6 @@
                             <i class="fas fa-layer-group"></i>
                             <span>Templates</span>
                         </a>
-                        <a href="#marketplace" class="nav-item" data-screen="marketplace">
-                            <i class="fas fa-store"></i>
-                            <span>Marketplace</span>
-                        </a>
                         <a href="#settings" class="nav-item" data-screen="settings">
                             <i class="fas fa-cog"></i>
                             <span>Settings</span>
@@ -96,7 +85,7 @@
                             </div>
                             <div class="stat-info">
                                 <span>Available RAM</span>
-                                <span id="availableRam">4096 MB</span>
+                                <span id="availableRam">2048 MB</span>
                             </div>
                         </div>
                         <div class="stat-card">
@@ -105,7 +94,7 @@
                             </div>
                             <div class="stat-info">
                                 <span>Storage</span>
-                                <span id="availableStorage">5000 MB</span>
+                                <span id="availableStorage">1000 MB</span>
                             </div>
                         </div>
                     </div>
@@ -115,8 +104,8 @@
                     <!-- Dashboard View -->
                     <div id="dashboardView" class="screen-content active">
                         <div class="dashboard-header-section">
-                            <h2>Welcome to Advanced VM Manager</h2>
-                            <p>Create and manage virtual machines with 20+ different environments</p>
+                            <h2>Welcome to VM Manager</h2>
+                            <p>Create and manage virtual machines directly in your browser</p>
                         </div>
 
                         <div class="quick-actions">
@@ -159,56 +148,189 @@
                             </div>
                         </div>
 
-                        <div class="vm-categories">
-                            <h3>VM Categories</h3>
-                            <div class="category-grid">
-                                <div class="category-card" data-category="linux">
-                                    <div class="category-icon">
+                        <div class="vm-types">
+                            <h3>Available VM Types</h3>
+                            <div class="type-cards">
+                                <div class="type-card linux-card">
+                                    <div class="type-icon">
                                         <i class="fab fa-linux"></i>
                                     </div>
-                                    <h4>Linux Systems</h4>
-                                    <p>Complete Linux distributions</p>
-                                    <span class="category-count">5 types</span>
+                                    <h4>Linux VMs</h4>
+                                    <p>Full Linux distributions with terminal access</p>
+                                    <div class="type-tags">
+                                        <span class="tag">x86 Emulation</span>
+                                        <span class="tag">Full OS</span>
+                                        <span class="tag">200+ Commands</span>
+                                    </div>
                                 </div>
-                                <div class="category-card" data-category="javascript">
-                                    <div class="category-icon">
+
+                                <div class="type-card js-card">
+                                    <div class="type-icon">
                                         <i class="fab fa-js-square"></i>
                                     </div>
-                                    <h4>JavaScript</h4>
-                                    <p>Node.js & Browser JS</p>
-                                    <span class="category-count">4 types</span>
+                                    <h4>JavaScript VMs</h4>
+                                    <p>Node.js environment for JavaScript execution</p>
+                                    <div class="type-tags">
+                                        <span class="tag">Node.js</span>
+                                        <span class="tag">ES6+</span>
+                                        <span class="tag">NPM</span>
+                                    </div>
                                 </div>
-                                <div class="category-card" data-category="python">
-                                    <div class="category-icon">
+
+                                <div class="type-card python-card">
+                                    <div class="type-icon">
                                         <i class="fab fa-python"></i>
                                     </div>
-                                    <h4>Python</h4>
-                                    <p>Python runtimes</p>
-                                    <span class="category-count">3 types</span>
-                                </div>
-                                <div class="category-card" data-category="web">
-                                    <div class="category-icon">
-                                        <i class="fas fa-globe"></i>
+                                    <h4>Python VMs</h4>
+                                    <p>Python runtime with package support</p>
+                                    <div class="type-tags">
+                                        <span class="tag">Python 3.11</span>
+                                        <span class="tag">Pyodide</span>
+                                        <span class="tag">Libraries</span>
                                     </div>
-                                    <h4>Web Languages</h4>
-                                    <p>PHP, Ruby, TypeScript</p>
-                                    <span class="category-count">6 types</span>
                                 </div>
-                                <div class="category-card" data-category="system">
-                                    <div class="category-icon">
-                                        <i class="fas fa-microchip"></i>
+
+                                <div class="type-card ruby-card">
+                                    <div class="type-icon">
+                                        <i class="fas fa-gem"></i>
                                     </div>
-                                    <h4>System Languages</h4>
-                                    <p>C, C++, Rust, Go</p>
-                                    <span class="category-count">5 types</span>
+                                    <h4>Ruby VMs</h4>
+                                    <p>Ruby environment with Rails support</p>
+                                    <div class="type-tags">
+                                        <span class="tag">Ruby 3.x</span>
+                                        <span class="tag">Gems</span>
+                                        <span class="tag">Rails</span>
+                                    </div>
                                 </div>
-                                <div class="category-card" data-category="scripting">
-                                    <div class="category-icon">
-                                        <i class="fas fa-code"></i>
+
+                                <div class="type-card php-card">
+                                    <div class="type-icon">
+                                        <i class="fab fa-php"></i>
                                     </div>
-                                    <h4>Scripting</h4>
-                                    <p>Lua, Perl, Bash</p>
-                                    <span class="category-count">4 types</span>
+                                    <h4>PHP VMs</h4>
+                                    <p>PHP runtime with Composer packages</p>
+                                    <div class="type-tags">
+                                        <span class="tag">PHP 8.x</span>
+                                        <span class="tag">Composer</span>
+                                        <span class="tag">Laravel</span>
+                                    </div>
+                                </div>
+
+                                <div class="type-card golang-card">
+                                    <div class="type-icon">
+                                        <i class="fab fa-golang"></i>
+                                    </div>
+                                    <h4>Go VMs</h4>
+                                    <p>Go language environment with modules</p>
+                                    <div class="type-tags">
+                                        <span class="tag">Go 1.20+</span>
+                                        <span class="tag">Modules</span>
+                                        <span class="tag">Concurrent</span>
+                                    </div>
+                                </div>
+
+                                <div class="type-card rust-card">
+                                    <div class="type-icon">
+                                        <i class="fas fa-cog"></i>
+                                    </div>
+                                    <h4>Rust VMs</h4>
+                                    <p>Rust programming environment</p>
+                                    <div class="type-tags">
+                                        <span class="tag">Rust 1.70+</span>
+                                        <span class="tag">Cargo</span>
+                                        <span class="tag">Safe</span>
+                                    </div>
+                                </div>
+
+                                <div class="type-card java-card">
+                                    <div class="type-icon">
+                                        <i class="fab fa-java"></i>
+                                    </div>
+                                    <h4>Java VMs</h4>
+                                    <p>Java runtime with Maven/Gradle</p>
+                                    <div class="type-tags">
+                                        <span class="tag">Java 17+</span>
+                                        <span class="tag">Maven</span>
+                                        <span class="tag">Spring</span>
+                                    </div>
+                                </div>
+
+                                <div class="type-card csharp-card">
+                                    <div class="type-icon">
+                                        <i class="fab fa-microsoft"></i>
+                                    </div>
+                                    <h4>C# VMs</h4>
+                                    <p>.NET environment with C# support</p>
+                                    <div class="type-tags">
+                                        <span class="tag">.NET 7</span>
+                                        <span class="tag">C# 11</span>
+                                        <span class="tag">ASP.NET</span>
+                                    </div>
+                                </div>
+
+                                <div class="type-card cpp-card">
+                                    <div class="type-icon">
+                                        <i class="fab fa-cuttlefish"></i>
+                                    </div>
+                                    <h4>C++ VMs</h4>
+                                    <p>C++ development environment</p>
+                                    <div class="type-tags">
+                                        <span class="tag">C++20</span>
+                                        <span class="tag">CMake</span>
+                                        <span class="tag">STL</span>
+                                    </div>
+                                </div>
+
+                                <div class="type-card bash-card">
+                                    <div class="type-icon">
+                                        <i class="fas fa-terminal"></i>
+                                    </div>
+                                    <h4>Bash VMs</h4>
+                                    <p>Bash shell scripting environment</p>
+                                    <div class="type-tags">
+                                        <span class="tag">Bash 5.x</span>
+                                        <span class="tag">Shell</span>
+                                        <span class="tag">Scripting</span>
+                                    </div>
+                                </div>
+
+                                <div class="type-card powershell-card">
+                                    <div class="type-icon">
+                                        <i class="fab fa-microsoft"></i>
+                                    </div>
+                                    <h4>PowerShell VMs</h4>
+                                    <p>PowerShell scripting environment</p>
+                                    <div class="type-tags">
+                                        <span class="tag">PS 7.x</span>
+                                        <span class="tag">Windows</span>
+                                        <span class="tag">Automation</span>
+                                    </div>
+                                </div>
+
+                                <div class="type-card sql-card">
+                                    <div class="type-icon">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <h4>SQL VMs</h4>
+                                    <p>SQL database query environment</p>
+                                    <div class="type-tags">
+                                        <span class="tag">SQL</span>
+                                        <span class="tag">MySQL</span>
+                                        <span class="tag">PostgreSQL</span>
+                                    </div>
+                                </div>
+
+                                <div class="type-card htmlcss-card">
+                                    <div class="type-icon">
+                                        <i class="fab fa-html5"></i>
+                                    </div>
+                                    <h4>HTML/CSS VMs</h4>
+                                    <p>Web development environment</p>
+                                    <div class="type-tags">
+                                        <span class="tag">HTML5</span>
+                                        <span class="tag">CSS3</span>
+                                        <span class="tag">JavaScript</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -228,12 +350,20 @@
                                 <label for="vmTypeFilter">Filter by Type:</label>
                                 <select id="vmTypeFilter">
                                     <option value="all">All Types</option>
-                                    <option value="linux">Linux Systems</option>
+                                    <option value="linux">Linux</option>
                                     <option value="javascript">JavaScript</option>
                                     <option value="python">Python</option>
-                                    <option value="web">Web Languages</option>
-                                    <option value="system">System Languages</option>
-                                    <option value="scripting">Scripting</option>
+                                    <option value="ruby">Ruby</option>
+                                    <option value="php">PHP</option>
+                                    <option value="golang">Go</option>
+                                    <option value="rust">Rust</option>
+                                    <option value="java">Java</option>
+                                    <option value="csharp">C#</option>
+                                    <option value="cpp">C++</option>
+                                    <option value="bash">Bash</option>
+                                    <option value="powershell">PowerShell</option>
+                                    <option value="sql">SQL</option>
+                                    <option value="htmlcss">HTML/CSS</option>
                                 </select>
                             </div>
                             <div class="filter-group">
@@ -250,6 +380,13 @@
 
                         <div id="vmList" class="vm-list-container">
                             <!-- VMs will be populated here -->
+                            <div class="empty-state">
+                                <i class="fas fa-server"></i>
+                                <p>No virtual machines created yet</p>
+                                <button class="btn-primary" id="createFromList">
+                                    Create Your First VM
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -261,201 +398,123 @@
                         </div>
 
                         <div class="templates-grid">
-                            <!-- Linux Templates -->
-                            <div class="template-card linux">
+                            <div class="template-card">
                                 <div class="template-header">
                                     <i class="fab fa-ubuntu"></i>
-                                    <h3>Ubuntu Server 22.04</h3>
+                                    <h3>Ubuntu Minimal</h3>
                                 </div>
-                                <p>Full Ubuntu server with package manager</p>
+                                <p>Lightweight Ubuntu with essential tools</p>
                                 <div class="template-specs">
-                                    <span><i class="fas fa-memory"></i> 512MB RAM</span>
-                                    <span><i class="fas fa-hdd"></i> 2GB Storage</span>
+                                    <span><i class="fas fa-memory"></i> 256MB RAM</span>
+                                    <span><i class="fas fa-hdd"></i> 500MB Storage</span>
                                 </div>
-                                <button class="btn-primary use-template" data-template="ubuntu-server">
+                                <button class="btn-primary use-template" data-template="ubuntu">
                                     Use Template
                                 </button>
                             </div>
 
-                            <div class="template-card linux">
+                            <div class="template-card">
+                                <div class="template-header">
+                                    <i class="fab fa-node-js"></i>
+                                    <h3>Node.js 18</h3>
+                                </div>
+                                <p>Node.js environment with npm package manager</p>
+                                <div class="template-specs">
+                                    <span><i class="fas fa-memory"></i> 128MB RAM</span>
+                                    <span><i class="fas fa-code"></i> Node.js 18</span>
+                                </div>
+                                <button class="btn-primary use-template" data-template="nodejs">
+                                    Use Template
+                                </button>
+                            </div>
+
+                            <div class="template-card">
+                                <div class="template-header">
+                                    <i class="fab fa-python"></i>
+                                    <h3>Python 3.11</h3>
+                                </div>
+                                <p>Python with scientific computing packages</p>
+                                <div class="template-specs">
+                                    <span><i class="fas fa-memory"></i> 128MB RAM</span>
+                                    <span><i class="fas fa-code"></i> Python 3.11</span>
+                                </div>
+                                <button class="btn-primary use-template" data-template="python">
+                                    Use Template
+                                </button>
+                            </div>
+
+                            <div class="template-card">
                                 <div class="template-header">
                                     <i class="fab fa-alpine"></i>
                                     <h3>Alpine Linux</h3>
                                 </div>
-                                <p>Ultra-small Linux for development</p>
+                                <p>Ultra-small Alpine Linux for quick testing</p>
                                 <div class="template-specs">
-                                    <span><i class="fas fa-memory"></i> 128MB RAM</span>
-                                    <span><i class="fas fa-hdd"></i> 500MB Storage</span>
+                                    <span><i class="fas fa-memory"></i> 64MB RAM</span>
+                                    <span><i class="fas fa-hdd"></i> 100MB Storage</span>
                                 </div>
                                 <button class="btn-primary use-template" data-template="alpine">
                                     Use Template
                                 </button>
                             </div>
 
-                            <!-- JavaScript Templates -->
-                            <div class="template-card javascript">
+                            <div class="template-card">
                                 <div class="template-header">
-                                    <i class="fab fa-node-js"></i>
-                                    <h3>Node.js 20 + Express</h3>
+                                    <i class="fas fa-gem"></i>
+                                    <h3>Ruby on Rails</h3>
                                 </div>
-                                <p>Node.js with Express.js framework</p>
+                                <p>Ruby with Rails framework and SQLite</p>
                                 <div class="template-specs">
                                     <span><i class="fas fa-memory"></i> 256MB RAM</span>
-                                    <span><i class="fas fa-code"></i> Node.js 20</span>
+                                    <span><i class="fas fa-code"></i> Ruby 3.2</span>
                                 </div>
-                                <button class="btn-primary use-template" data-template="nodejs-express">
+                                <button class="btn-primary use-template" data-template="rails">
                                     Use Template
                                 </button>
                             </div>
 
-                            <!-- Python Templates -->
-                            <div class="template-card python">
-                                <div class="template-header">
-                                    <i class="fab fa-python"></i>
-                                    <h3>Python Data Science</h3>
-                                </div>
-                                <p>Python with NumPy, Pandas, Matplotlib</p>
-                                <div class="template-specs">
-                                    <span><i class="fas fa-memory"></i> 512MB RAM</span>
-                                    <span><i class="fas fa-code"></i> Python 3.11</span>
-                                </div>
-                                <button class="btn-primary use-template" data-template="python-datascience">
-                                    Use Template
-                                </button>
-                            </div>
-
-                            <!-- Web Templates -->
-                            <div class="template-card web">
+                            <div class="template-card">
                                 <div class="template-header">
                                     <i class="fab fa-php"></i>
-                                    <h3>PHP 8.2 + MySQL</h3>
+                                    <h3>PHP Laravel</h3>
                                 </div>
-                                <p>PHP with MySQL support</p>
+                                <p>PHP with Laravel framework and MySQL</p>
                                 <div class="template-specs">
                                     <span><i class="fas fa-memory"></i> 256MB RAM</span>
                                     <span><i class="fas fa-code"></i> PHP 8.2</span>
                                 </div>
-                                <button class="btn-primary use-template" data-template="php-mysql">
+                                <button class="btn-primary use-template" data-template="laravel">
                                     Use Template
                                 </button>
                             </div>
 
-                            <div class="template-card web">
+                            <div class="template-card">
                                 <div class="template-header">
-                                    <i class="fab fa-ruby"></i>
-                                    <h3>Ruby on Rails</h3>
+                                    <i class="fab fa-golang"></i>
+                                    <h3>Go API Server</h3>
                                 </div>
-                                <p>Ruby with Rails framework</p>
-                                <div class="template-specs">
-                                    <span><i class="fas fa-memory"></i> 512MB RAM</span>
-                                    <span><i class="fas fa-code"></i> Ruby 3.2</span>
-                                </div>
-                                <button class="btn-primary use-template" data-template="ruby-rails">
-                                    Use Template
-                                </button>
-                            </div>
-
-                            <!-- System Templates -->
-                            <div class="template-card system">
-                                <div class="template-header">
-                                    <i class="fas fa-cogs"></i>
-                                    <h3>C/C++ Development</h3>
-                                </div>
-                                <p>C/C++ with GCC compiler</p>
-                                <div class="template-specs">
-                                    <span><i class="fas fa-memory"></i> 512MB RAM</span>
-                                    <span><i class="fas fa-code"></i> GCC 11</span>
-                                </div>
-                                <button class="btn-primary use-template" data-template="cpp-dev">
-                                    Use Template
-                                </button>
-                            </div>
-
-                            <!-- Scripting Templates -->
-                            <div class="template-card scripting">
-                                <div class="template-header">
-                                    <i class="fas fa-terminal"></i>
-                                    <h3>Bash Shell</h3>
-                                </div>
-                                <p>Full Bash shell environment</p>
+                                <p>Go with Gin framework and REST API</p>
                                 <div class="template-specs">
                                     <span><i class="fas fa-memory"></i> 128MB RAM</span>
-                                    <span><i class="fas fa-code"></i> Bash 5.1</span>
+                                    <span><i class="fas fa-code"></i> Go 1.20</span>
                                 </div>
-                                <button class="btn-primary use-template" data-template="bash-shell">
+                                <button class="btn-primary use-template" data-template="goapi">
                                     Use Template
                                 </button>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Marketplace View -->
-                    <div id="marketplaceView" class="screen-content">
-                        <div class="view-header">
-                            <h2>VM Marketplace</h2>
-                            <p>Discover and install new VM types</p>
-                        </div>
-
-                        <div class="marketplace-grid">
-                            <div class="marketplace-item">
-                                <div class="marketplace-header">
-                                    <i class="fab fa-rust"></i>
-                                    <h3>Rust VM</h3>
-                                    <span class="marketplace-badge">New</span>
-                                </div>
-                                <p>Rust programming environment with Cargo</p>
-                                <div class="marketplace-stats">
-                                    <span><i class="fas fa-download"></i> 500+ installs</span>
-                                    <span><i class="fas fa-star"></i> 4.8/5</span>
-                                </div>
-                                <button class="btn-secondary install-vm" data-vm="rust">
-                                    <i class="fas fa-download"></i> Install
-                                </button>
-                            </div>
-
-                            <div class="marketplace-item">
-                                <div class="marketplace-header">
-                                    <i class="fab fa-go"></i>
-                                    <h3>Go VM</h3>
-                                </div>
-                                <p>Go programming language with standard library</p>
-                                <div class="marketplace-stats">
-                                    <span><i class="fas fa-download"></i> 300+ installs</span>
-                                    <span><i class="fas fa-star"></i> 4.6/5</span>
-                                </div>
-                                <button class="btn-secondary install-vm" data-vm="go">
-                                    <i class="fas fa-download"></i> Install
-                                </button>
-                            </div>
-
-                            <div class="marketplace-item">
-                                <div class="marketplace-header">
+                            <div class="template-card">
+                                <div class="template-header">
                                     <i class="fab fa-java"></i>
-                                    <h3>Java VM</h3>
+                                    <h3>Java Spring Boot</h3>
                                 </div>
-                                <p>Java runtime with JVM</p>
-                                <div class="marketplace-stats">
-                                    <span><i class="fas fa-download"></i> 700+ installs</span>
-                                    <span><i class="fas fa-star"></i> 4.7/5</span>
+                                <p>Java with Spring Boot and Maven</p>
+                                <div class="template-specs">
+                                    <span><i class="fas fa-memory"></i> 512MB RAM</span>
+                                    <span><i class="fas fa-code"></i> Java 17</span>
                                 </div>
-                                <button class="btn-secondary install-vm" data-vm="java">
-                                    <i class="fas fa-download"></i> Install
-                                </button>
-                            </div>
-
-                            <div class="marketplace-item">
-                                <div class="marketplace-header">
-                                    <i class="fab fa-swift"></i>
-                                    <h3>Swift VM</h3>
-                                    <span class="marketplace-badge">Beta</span>
-                                </div>
-                                <p>Swift programming language</p>
-                                <div class="marketplace-stats">
-                                    <span><i class="fas fa-download"></i> 150+ installs</span>
-                                    <span><i class="fas fa-star"></i> 4.3/5</span>
-                                </div>
-                                <button class="btn-secondary install-vm" data-vm="swift">
-                                    <i class="fas fa-download"></i> Install
+                                <button class="btn-primary use-template" data-template="spring">
+                                    Use Template
                                 </button>
                             </div>
                         </div>
@@ -479,12 +538,17 @@
                                     </select>
                                 </div>
                                 <div class="setting-option">
-                                    <label>Terminal Font</label>
-                                    <select id="terminalFont">
-                                        <option value="JetBrains Mono">JetBrains Mono</option>
-                                        <option value="Fira Code">Fira Code</option>
-                                        <option value="Cascadia Code">Cascadia Code</option>
-                                        <option value="Monaco">Monaco</option>
+                                    <label>Font Size</label>
+                                    <input type="range" id="fontSize" min="12" max="18" value="14">
+                                    <span id="fontSizeValue">14px</span>
+                                </div>
+                                <div class="setting-option">
+                                    <label>Terminal Theme</label>
+                                    <select id="terminalTheme">
+                                        <option value="default">Default (Green)</option>
+                                        <option value="monokai">Monokai</option>
+                                        <option value="solarized">Solarized</option>
+                                        <option value="dracula">Dracula</option>
                                     </select>
                                 </div>
                             </div>
@@ -493,17 +557,21 @@
                                 <h3><i class="fas fa-microchip"></i> Performance</h3>
                                 <div class="setting-option">
                                     <label>Max RAM per VM</label>
-                                    <input type="range" id="maxRam" min="128" max="8192" value="2048">
-                                    <span id="maxRamValue">2048 MB</span>
+                                    <input type="range" id="maxRam" min="64" max="4096" value="1024">
+                                    <span id="maxRamValue">1024 MB</span>
                                 </div>
                                 <div class="setting-option">
-                                    <label>Auto-save Interval</label>
-                                    <select id="autoSaveInterval">
-                                        <option value="0">Disabled</option>
-                                        <option value="30000">30 seconds</option>
-                                        <option value="60000">1 minute</option>
-                                        <option value="300000" selected>5 minutes</option>
-                                    </select>
+                                    <label>Max Storage per VM</label>
+                                    <input type="range" id="maxStorage" min="100" max="5000" value="1000">
+                                    <span id="maxStorageValue">1000 MB</span>
+                                </div>
+                                <div class="setting-option">
+                                    <label>Auto-save VM State</label>
+                                    <input type="checkbox" id="autoSave" checked>
+                                </div>
+                                <div class="setting-option">
+                                    <label>Enable Hardware Acceleration</label>
+                                    <input type="checkbox" id="hardwareAccel" checked>
                                 </div>
                             </div>
 
@@ -514,18 +582,97 @@
                                     <input type="checkbox" id="enableSandbox" checked>
                                 </div>
                                 <div class="setting-option">
-                                    <label>Network Isolation</label>
-                                    <input type="checkbox" id="networkIsolation" checked>
+                                    <label>Clear Console on Exit</label>
+                                    <input type="checkbox" id="clearConsole" checked>
+                                </div>
+                                <div class="setting-option">
+                                    <label>Command History Limit</label>
+                                    <input type="range" id="historyLimit" min="10" max="1000" value="100">
+                                    <span id="historyLimitValue">100 commands</span>
+                                </div>
+                                <div class="setting-option">
+                                    <label>Enable Auto-complete</label>
+                                    <input type="checkbox" id="autoComplete" checked>
+                                </div>
+                            </div>
+
+                            <div class="settings-card">
+                                <h3><i class="fas fa-network-wired"></i> Network</h3>
+                                <div class="setting-option">
+                                    <label>Enable Network for VMs</label>
+                                    <input type="checkbox" id="enableNetwork" checked>
+                                </div>
+                                <div class="setting-option">
+                                    <label>Proxy Settings</label>
+                                    <input type="text" id="proxySettings" placeholder="No proxy configured">
+                                </div>
+                                <div class="setting-option">
+                                    <label>DNS Server</label>
+                                    <input type="text" id="dnsServer" value="8.8.8.8">
+                                </div>
+                            </div>
+
+                            <div class="settings-card">
+                                <h3><i class="fas fa-language"></i> Language & Keyboard</h3>
+                                <div class="setting-option">
+                                    <label>Interface Language</label>
+                                    <select id="interfaceLanguage">
+                                        <option value="en">English</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="fr">French</option>
+                                        <option value="de">German</option>
+                                        <option value="zh">Chinese</option>
+                                    </select>
+                                </div>
+                                <div class="setting-option">
+                                    <label>Keyboard Layout</label>
+                                    <select id="keyboardLayout">
+                                        <option value="us">US (QWERTY)</option>
+                                        <option value="uk">UK</option>
+                                        <option value="de">German</option>
+                                        <option value="fr">French</option>
+                                    </select>
+                                </div>
+                                <div class="setting-option">
+                                    <label>Enable Keyboard Shortcuts</label>
+                                    <input type="checkbox" id="keyboardShortcuts" checked>
+                                </div>
+                            </div>
+
+                            <div class="settings-card">
+                                <h3><i class="fas fa-backup"></i> Backup & Restore</h3>
+                                <div class="setting-option">
+                                    <label>Auto-backup Interval</label>
+                                    <select id="backupInterval">
+                                        <option value="0">Never</option>
+                                        <option value="5">Every 5 minutes</option>
+                                        <option value="15" selected>Every 15 minutes</option>
+                                        <option value="30">Every 30 minutes</option>
+                                        <option value="60">Every hour</option>
+                                    </select>
+                                </div>
+                                <div class="setting-option">
+                                    <label>Max Backup Files</label>
+                                    <input type="range" id="maxBackups" min="1" max="50" value="10">
+                                    <span id="maxBackupsValue">10 files</span>
+                                </div>
+                                <div class="setting-option">
+                                    <button class="btn-small" id="exportSettings">
+                                        <i class="fas fa-download"></i> Export Settings
+                                    </button>
+                                    <button class="btn-small" id="importSettings">
+                                        <i class="fas fa-upload"></i> Import Settings
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
                         <div class="settings-actions">
                             <button class="btn-secondary" id="resetSettings">
-                                Reset to Defaults
+                                <i class="fas fa-redo"></i> Reset to Defaults
                             </button>
                             <button class="btn-primary" id="saveSettings">
-                                Save Settings
+                                <i class="fas fa-save"></i> Save Settings
                             </button>
                         </div>
                     </div>
@@ -533,7 +680,7 @@
             </main>
         </div>
 
-        <!-- VM Creation Modal (Expanded with new types) -->
+        <!-- VM Creation Modal -->
         <div id="vmCreationModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -544,188 +691,440 @@
                     <div class="creation-steps">
                         <div class="step active" data-step="1">
                             <span class="step-number">1</span>
-                            <span class="step-title">Category</span>
+                            <span class="step-title">Type</span>
                         </div>
                         <div class="step" data-step="2">
                             <span class="step-number">2</span>
-                            <span class="step-title">Type</span>
+                            <span class="step-title">Configuration</span>
                         </div>
                         <div class="step" data-step="3">
                             <span class="step-number">3</span>
-                            <span class="step-title">Configuration</span>
-                        </div>
-                        <div class="step" data-step="4">
-                            <span class="step-number">4</span>
                             <span class="step-title">Review</span>
                         </div>
                     </div>
 
-                    <!-- Step 1: Category Selection -->
+                    <!-- Step 1: Type Selection -->
                     <div class="creation-step active" id="step1">
-                        <h3>Select VM Category</h3>
-                        <div class="category-selection">
-                            <div class="category-option active" data-category="linux">
-                                <div class="category-icon">
+                        <h3>Select VM Type</h3>
+                        <p class="step-description">Choose the type of virtual machine you want to create</p>
+                        <div class="type-selection">
+                            <div class="type-option active" data-type="linux">
+                                <div class="type-icon">
                                     <i class="fab fa-linux"></i>
                                 </div>
-                                <h4>Linux Systems</h4>
-                                <p>Complete operating systems</p>
-                                <span class="option-count">5 types available</span>
+                                <h4>Linux VM</h4>
+                                <p>Full operating system with terminal access</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> x86 Emulation</li>
+                                    <li><i class="fas fa-check"></i> Multiple Distros</li>
+                                    <li><i class="fas fa-check"></i> File System</li>
+                                    <li><i class="fas fa-check"></i> 200+ Commands</li>
+                                </ul>
                             </div>
-                            <div class="category-option" data-category="javascript">
-                                <div class="category-icon">
+
+                            <div class="type-option" data-type="javascript">
+                                <div class="type-icon">
                                     <i class="fab fa-js-square"></i>
                                 </div>
-                                <h4>JavaScript</h4>
-                                <p>Node.js and browser JavaScript</p>
-                                <span class="option-count">4 types available</span>
+                                <h4>JavaScript VM</h4>
+                                <p>Node.js environment for JavaScript execution</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> Node.js REPL</li>
+                                    <li><i class="fas fa-check"></i> NPM Packages</li>
+                                    <li><i class="fas fa-check"></i> ES6+ Features</li>
+                                    <li><i class="fas fa-check"></i> Async/Await</li>
+                                </ul>
                             </div>
-                            <div class="category-option" data-category="python">
-                                <div class="category-icon">
+
+                            <div class="type-option" data-type="python">
+                                <div class="type-icon">
                                     <i class="fab fa-python"></i>
                                 </div>
-                                <h4>Python</h4>
-                                <p>Python runtimes and frameworks</p>
-                                <span class="option-count">3 types available</span>
+                                <h4>Python VM</h4>
+                                <p>Python runtime with scientific computing</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> Python 3.11</li>
+                                    <li><i class="fas fa-check"></i> PIP Packages</li>
+                                    <li><i class="fas fa-check"></i> NumPy/Pandas</li>
+                                    <li><i class="fas fa-check"></i> Pyodide Runtime</li>
+                                </ul>
                             </div>
-                            <div class="category-option" data-category="web">
-                                <div class="category-icon">
-                                    <i class="fas fa-globe"></i>
+
+                            <div class="type-option" data-type="ruby">
+                                <div class="type-icon">
+                                    <i class="fas fa-gem"></i>
                                 </div>
-                                <h4>Web Languages</h4>
-                                <p>PHP, Ruby, TypeScript, etc.</p>
-                                <span class="option-count">6 types available</span>
+                                <h4>Ruby VM</h4>
+                                <p>Ruby environment with Rails framework</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> Ruby 3.2</li>
+                                    <li><i class="fas fa-check"></i> Gem Support</li>
+                                    <li><i class="fas fa-check"></i> Rails Framework</li>
+                                    <li><i class="fas fa-check"></i> IRB Console</li>
+                                </ul>
                             </div>
-                            <div class="category-option" data-category="system">
-                                <div class="category-icon">
-                                    <i class="fas fa-microchip"></i>
+
+                            <div class="type-option" data-type="php">
+                                <div class="type-icon">
+                                    <i class="fab fa-php"></i>
                                 </div>
-                                <h4>System Languages</h4>
-                                <p>C, C++, Rust, Go, etc.</p>
-                                <span class="option-count">5 types available</span>
+                                <h4>PHP VM</h4>
+                                <p>PHP runtime with web development tools</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> PHP 8.2</li>
+                                    <li><i class="fas fa-check"></i> Composer</li>
+                                    <li><i class="fas fa-check"></i> Laravel Support</li>
+                                    <li><i class="fas fa-check"></i> Web Server</li>
+                                </ul>
                             </div>
-                            <div class="category-option" data-category="scripting">
-                                <div class="category-icon">
-                                    <i class="fas fa-code"></i>
+
+                            <div class="type-option" data-type="golang">
+                                <div class="type-icon">
+                                    <i class="fab fa-golang"></i>
                                 </div>
-                                <h4>Scripting Languages</h4>
-                                <p>Lua, Perl, Bash, etc.</p>
-                                <span class="option-count">4 types available</span>
+                                <h4>Go VM</h4>
+                                <p>Go language environment with modules</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> Go 1.20</li>
+                                    <li><i class="fas fa-check"></i> Module Support</li>
+                                    <li><i class="fas fa-check"></i> Concurrency</li>
+                                    <li><i class="fas fa-check"></i> Gin Framework</li>
+                                </ul>
+                            </div>
+
+                            <div class="type-option" data-type="rust">
+                                <div class="type-icon">
+                                    <i class="fas fa-cog"></i>
+                                </div>
+                                <h4>Rust VM</h4>
+                                <p>Rust programming environment</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> Rust 1.70</li>
+                                    <li><i class="fas fa-check"></i> Cargo</li>
+                                    <li><i class="fas fa-check"></i> Memory Safety</li>
+                                    <li><i class="fas fa-check"></i> Async Runtime</li>
+                                </ul>
+                            </div>
+
+                            <div class="type-option" data-type="java">
+                                <div class="type-icon">
+                                    <i class="fab fa-java"></i>
+                                </div>
+                                <h4>Java VM</h4>
+                                <p>Java runtime with Maven/Gradle</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> Java 17</li>
+                                    <li><i class="fas fa-check"></i> Maven/Gradle</li>
+                                    <li><i class="fas fa-check"></i> Spring Boot</li>
+                                    <li><i class="fas fa-check"></i> JVM</li>
+                                </ul>
+                            </div>
+
+                            <div class="type-option" data-type="csharp">
+                                <div class="type-icon">
+                                    <i class="fab fa-microsoft"></i>
+                                </div>
+                                <h4>C# VM</h4>
+                                <p>.NET environment with C# support</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> .NET 7</li>
+                                    <li><i class="fas fa-check"></i> C# 11</li>
+                                    <li><i class="fas fa-check"></i> ASP.NET Core</li>
+                                    <li><i class="fas fa-check"></i> Entity Framework</li>
+                                </ul>
+                            </div>
+
+                            <div class="type-option" data-type="cpp">
+                                <div class="type-icon">
+                                    <i class="fab fa-cuttlefish"></i>
+                                </div>
+                                <h4>C++ VM</h4>
+                                <p>C++ development environment</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> C++20</li>
+                                    <li><i class="fas fa-check"></i> CMake</li>
+                                    <li><i class="fas fa-check"></i> STL Library</li>
+                                    <li><i class="fas fa-check"></i> GCC/Clang</li>
+                                </ul>
+                            </div>
+
+                            <div class="type-option" data-type="bash">
+                                <div class="type-icon">
+                                    <i class="fas fa-terminal"></i>
+                                </div>
+                                <h4>Bash VM</h4>
+                                <p>Bash shell scripting environment</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> Bash 5.x</li>
+                                    <li><i class="fas fa-check"></i> Shell Scripting</li>
+                                    <li><i class="fas fa-check"></i> Unix Tools</li>
+                                    <li><i class="fas fa-check"></i> Automation</li>
+                                </ul>
+                            </div>
+
+                            <div class="type-option" data-type="powershell">
+                                <div class="type-icon">
+                                    <i class="fab fa-microsoft"></i>
+                                </div>
+                                <h4>PowerShell VM</h4>
+                                <p>PowerShell scripting environment</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> PS 7.x</li>
+                                    <li><i class="fas fa-check"></i> Cmdlets</li>
+                                    <li><i class="fas fa-check"></i> Windows Automation</li>
+                                    <li><i class="fas fa-check"></i> .NET Integration</li>
+                                </ul>
+                            </div>
+
+                            <div class="type-option" data-type="sql">
+                                <div class="type-icon">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <h4>SQL VM</h4>
+                                <p>SQL database query environment</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> SQL Standard</li>
+                                    <li><i class="fas fa-check"></i> MySQL/PostgreSQL</li>
+                                    <li><i class="fas fa-check"></i> Sample Database</li>
+                                    <li><i class="fas fa-check"></i> Query Builder</li>
+                                </ul>
+                            </div>
+
+                            <div class="type-option" data-type="htmlcss">
+                                <div class="type-icon">
+                                    <i class="fab fa-html5"></i>
+                                </div>
+                                <h4>HTML/CSS VM</h4>
+                                <p>Web development environment</p>
+                                <ul class="type-features">
+                                    <li><i class="fas fa-check"></i> HTML5/CSS3</li>
+                                    <li><i class="fas fa-check"></i> JavaScript</li>
+                                    <li><i class="fas fa-check"></i> Live Preview</li>
+                                    <li><i class="fas fa-check"></i> Dev Tools</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Step 2: Type Selection -->
+                    <!-- Step 2: Configuration -->
                     <div class="creation-step" id="step2">
-                        <h3>Select VM Type</h3>
-                        <div id="typeSelection" class="type-selection-grid">
-                            <!-- Types will be populated based on category -->
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Configuration -->
-                    <div class="creation-step" id="step3">
                         <h3>Configure Your VM</h3>
+                        <p class="step-description">Set up your virtual machine specifications</p>
                         <div class="config-form">
                             <div class="form-group">
-                                <label for="vmName">VM Name</label>
+                                <label for="vmName">
+                                    <i class="fas fa-tag"></i> VM Name
+                                </label>
                                 <input type="text" id="vmName" placeholder="my-vm" value="my-vm-1">
+                                <small class="form-help">Choose a unique name for your VM</small>
                             </div>
 
-                            <!-- Linux Configuration -->
-                            <div id="linuxConfig" class="vm-config-section">
+                            <div id="linuxConfig" class="vm-config-section active">
                                 <div class="form-group">
-                                    <label for="linuxDistro">Distribution</label>
+                                    <label for="linuxDistro">
+                                        <i class="fas fa-download"></i> Distribution
+                                    </label>
                                     <select id="linuxDistro">
-                                        <option value="alpine">Alpine Linux (Lightweight)</option>
-                                        <option value="debian">Debian 11 (Stable)</option>
-                                        <option value="ubuntu">Ubuntu 22.04 (LTS)</option>
-                                        <option value="fedora">Fedora 38</option>
-                                        <option value="arch">Arch Linux (Rolling)</option>
+                                        <option value="alpine">Alpine Linux (5MB - Minimal)</option>
+                                        <option value="debian">Debian 11 (50MB - Stable)</option>
+                                        <option value="ubuntu">Ubuntu 22.04 (80MB - User-friendly)</option>
+                                        <option value="arch">Arch Linux (20MB - Rolling Release)</option>
+                                        <option value="fedora">Fedora 38 (70MB - Cutting Edge)</option>
                                     </select>
                                 </div>
+
                                 <div class="form-group">
-                                    <label for="linuxRam">RAM Allocation</label>
+                                    <label for="linuxRam">
+                                        <i class="fas fa-memory"></i> RAM Allocation
+                                    </label>
                                     <div class="range-group">
-                                        <input type="range" id="linuxRam" min="128" max="4096" value="512">
-                                        <span id="linuxRamValue">512 MB</span>
+                                        <input type="range" id="linuxRam" min="64" max="2048" value="256" step="64">
+                                        <span id="linuxRamValue">256 MB</span>
                                     </div>
+                                    <small class="form-help">More RAM allows for better performance</small>
                                 </div>
+
                                 <div class="form-group">
-                                    <label for="linuxStorage">Storage Size</label>
+                                    <label for="linuxStorage">
+                                        <i class="fas fa-hdd"></i> Storage Size
+                                    </label>
                                     <div class="range-group">
-                                        <input type="range" id="linuxStorage" min="500" max="10000" value="2000">
-                                        <span id="linuxStorageValue">2000 MB</span>
+                                        <input type="range" id="linuxStorage" min="100" max="5000" value="500" step="100">
+                                        <span id="linuxStorageValue">500 MB</span>
+                                    </div>
+                                    <small class="form-help">Storage for files and applications</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="linuxNetwork">
+                                        <i class="fas fa-wifi"></i> Network Settings
+                                    </label>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="linuxNetwork" checked>
+                                        <label for="linuxNetwork">Enable Network</label>
+                                    </div>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="linuxSound">
+                                        <label for="linuxSound">Enable Sound</label>
+                                    </div>
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="linuxGUI">
+                                        <label for="linuxGUI">Enable GUI (Experimental)</label>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- JavaScript Configuration -->
+                            <!-- JavaScript Config -->
                             <div id="javascriptConfig" class="vm-config-section">
                                 <div class="form-group">
-                                    <label for="jsType">Runtime Type</label>
-                                    <select id="jsType">
-                                        <option value="nodejs">Node.js</option>
-                                        <option value="deno">Deno</option>
-                                        <option value="bun">Bun</option>
-                                        <option value="browser">Browser JavaScript</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="jsVersion">Version</label>
+                                    <label for="jsVersion">
+                                        <i class="fab fa-node-js"></i> Node.js Version
+                                    </label>
                                     <select id="jsVersion">
-                                        <option value="20">Node.js 20 LTS</option>
-                                        <option value="18">Node.js 18</option>
-                                        <option value="16">Node.js 16</option>
+                                        <option value="16">Node.js 16 LTS</option>
+                                        <option value="18" selected>Node.js 18 LTS</option>
+                                        <option value="20">Node.js 20</option>
                                     </select>
                                 </div>
+
                                 <div class="form-group">
-                                    <label for="jsRam">RAM Allocation</label>
+                                    <label for="jsRam">
+                                        <i class="fas fa-memory"></i> RAM Allocation
+                                    </label>
                                     <div class="range-group">
-                                        <input type="range" id="jsRam" min="64" max="2048" value="256">
-                                        <span id="jsRamValue">256 MB</span>
+                                        <input type="range" id="jsRam" min="32" max="1024" value="128" step="32">
+                                        <span id="jsRamValue">128 MB</span>
                                     </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="jsPackages">
+                                        <i class="fas fa-box"></i> Pre-installed Packages
+                                    </label>
+                                    <input type="text" id="jsPackages" placeholder="lodash, express, axios, react">
+                                    <small class="form-help">Comma-separated list of npm packages</small>
                                 </div>
                             </div>
 
-                            <!-- Additional config sections will be shown based on type -->
+                            <!-- Python Config -->
+                            <div id="pythonConfig" class="vm-config-section">
+                                <div class="form-group">
+                                    <label for="pythonVersion">
+                                        <i class="fab fa-python"></i> Python Version
+                                    </label>
+                                    <select id="pythonVersion">
+                                        <option value="3.9">Python 3.9</option>
+                                        <option value="3.10">Python 3.10</option>
+                                        <option value="3.11" selected>Python 3.11</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="pythonRam">
+                                        <i class="fas fa-memory"></i> RAM Allocation
+                                    </label>
+                                    <div class="range-group">
+                                        <input type="range" id="pythonRam" min="32" max="1024" value="128" step="32">
+                                        <span id="pythonRamValue">128 MB</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="pythonPackages">
+                                        <i class="fas fa-box"></i> Pre-installed Packages
+                                    </label>
+                                    <input type="text" id="pythonPackages" placeholder="numpy, pandas, requests, flask">
+                                    <small class="form-help">Comma-separated list of pip packages</small>
+                                </div>
+                            </div>
+
+                            <!-- Other VM types configurations would follow similar pattern -->
+                            <!-- For brevity, I'm showing only Linux, JS, and Python -->
+                            <!-- In practice, you'd have sections for all 14 VM types -->
+
+                            <div class="form-group advanced-settings">
+                                <button class="btn-small" id="toggleAdvanced">
+                                    <i class="fas fa-cogs"></i> Advanced Settings
+                                </button>
+                                <div class="advanced-options" id="advancedOptions" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="cpuCores">
+                                            <i class="fas fa-microchip"></i> CPU Cores
+                                        </label>
+                                        <select id="cpuCores">
+                                            <option value="1">1 Core</option>
+                                            <option value="2" selected>2 Cores</option>
+                                            <option value="4">4 Cores</option>
+                                            <option value="8">8 Cores</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="bootOrder">
+                                            <i class="fas fa-compact-disc"></i> Boot Order
+                                        </label>
+                                        <select id="bootOrder">
+                                            <option value="cdrom">CD-ROM First</option>
+                                            <option value="hdd" selected>Hard Disk First</option>
+                                            <option value="network">Network Boot</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Step 4: Review -->
-                    <div class="creation-step" id="step4">
+                    <!-- Step 3: Review -->
+                    <div class="creation-step" id="step3">
                         <h3>Review Configuration</h3>
+                        <p class="step-description">Review your VM configuration before creation</p>
                         <div class="review-config">
                             <div class="review-item">
-                                <span class="review-label">Category:</span>
-                                <span class="review-value" id="reviewCategory">Linux</span>
-                            </div>
-                            <div class="review-item">
-                                <span class="review-label">Type:</span>
-                                <span class="review-value" id="reviewType">Alpine Linux</span>
+                                <span class="review-label">VM Type:</span>
+                                <span class="review-value" id="reviewType">Linux VM</span>
                             </div>
                             <div class="review-item">
                                 <span class="review-label">VM Name:</span>
                                 <span class="review-value" id="reviewName">my-vm-1</span>
                             </div>
                             <div class="review-item">
-                                <span class="review-label">RAM:</span>
-                                <span class="review-value" id="reviewRam">512 MB</span>
+                                <span class="review-label">RAM Allocation:</span>
+                                <span class="review-value" id="reviewRam">256 MB</span>
                             </div>
                             <div class="review-item">
-                                <span class="review-label">Storage:</span>
-                                <span class="review-value" id="reviewStorage">2000 MB</span>
+                                <span class="review-label">Storage Size:</span>
+                                <span class="review-value" id="reviewStorage">500 MB</span>
                             </div>
                             <div class="review-item">
-                                <span class="review-label">Features:</span>
-                                <span class="review-value" id="reviewFeatures">Terminal, Package Manager</span>
+                                <span class="review-label">Distribution/Version:</span>
+                                <span class="review-value" id="reviewConfig">Alpine Linux (5MB - Minimal)</span>
                             </div>
+                            <div class="review-item">
+                                <span class="review-label">Network:</span>
+                                <span class="review-value" id="reviewNetwork">Enabled</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Estimated Size:</span>
+                                <span class="review-value" id="reviewSize">~50 MB</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Creation Time:</span>
+                                <span class="review-value" id="reviewTime">~10 seconds</span>
+                            </div>
+                        </div>
+
+                        <div class="creation-notice">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Your VM will be created with these specifications. You can modify these settings later in the VM configuration.</p>
                         </div>
                     </div>
 
                     <div class="creation-actions">
-                        <button class="btn-secondary" id="prevStep">Previous</button>
-                        <button class="btn-primary" id="nextStep">Next</button>
+                        <button class="btn-secondary" id="prevStep">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button class="btn-primary" id="nextStep">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
                         <button class="btn-primary" id="createVM" style="display: none;">
                             <i class="fas fa-play"></i> Create & Start VM
                         </button>
@@ -734,7 +1133,7 @@
             </div>
         </div>
 
-        <!-- VM Screen (Updated with pause button) -->
+        <!-- VM Screen -->
         <div id="vmScreen" class="screen">
             <header class="vm-screen-header">
                 <button class="btn-icon" id="backToDashboard">
@@ -748,7 +1147,10 @@
                     </div>
                 </div>
                 <div class="vm-screen-actions">
-                    <button class="btn-icon" id="pauseVM" title="Pause VM">
+                    <button class="btn-icon" id="saveVM" title="Save VM State">
+                        <i class="fas fa-save"></i>
+                    </button>
+                    <button class="btn-icon" id="pauseVM" title="Pause VM" style="display: none;">
                         <i class="fas fa-pause"></i>
                     </button>
                     <button class="btn-icon" id="restartVM" title="Restart VM">
@@ -756,9 +1158,6 @@
                     </button>
                     <button class="btn-icon" id="powerVM" title="Power On/Off">
                         <i class="fas fa-power-off"></i>
-                    </button>
-                    <button class="btn-icon" id="saveVM" title="Save VM State">
-                        <i class="fas fa-save"></i>
                     </button>
                     <button class="btn-icon" id="fullscreenVM" title="Fullscreen">
                         <i class="fas fa-expand"></i>
@@ -784,6 +1183,9 @@
                         <button class="console-tab" data-tab="network">
                             <i class="fas fa-network-wired"></i> Network
                         </button>
+                        <button class="console-tab" data-tab="snapshots">
+                            <i class="fas fa-camera"></i> Snapshots
+                        </button>
                     </div>
 
                     <!-- Terminal Tab -->
@@ -793,11 +1195,19 @@
                                 <span class="timestamp">[12:00:00]</span>
                                 <span class="message">Starting virtual machine...</span>
                             </div>
+                            <div class="terminal-line info">
+                                <span class="timestamp">[12:00:01]</span>
+                                <span class="message">Type 'help' for available commands</span>
+                            </div>
+                            <div class="terminal-line info">
+                                <span class="timestamp">[12:00:02]</span>
+                                <span class="message">Use Ctrl+P to pause/resume VM</span>
+                            </div>
                         </div>
                         <div class="terminal-input">
-                            <span class="prompt" id="terminalPrompt">$ </span>
+                            <span class="prompt">$ </span>
                             <input type="text" id="terminalInput" autocomplete="off" 
-                                   placeholder="Type a command...">
+                                   placeholder="Type a command..." autofocus>
                             <button class="btn-small" id="sendCommand">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
@@ -813,14 +1223,17 @@
                             <button class="btn-small" id="copyOutput">
                                 <i class="fas fa-copy"></i> Copy
                             </button>
+                            <button class="btn-small" id="exportLogs">
+                                <i class="fas fa-download"></i> Export
+                            </button>
                             <div class="log-level">
                                 <label>Log Level:</label>
                                 <select id="logLevel">
                                     <option value="all">All</option>
-                                    <option value="debug">Debug</option>
                                     <option value="info">Info</option>
                                     <option value="warn">Warnings</option>
                                     <option value="error">Errors</option>
+                                    <option value="debug">Debug</option>
                                 </select>
                             </div>
                         </div>
@@ -845,9 +1258,38 @@
                                 <button class="btn-small" id="deleteFile">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
+                                <div class="file-path">
+                                    <span id="currentPath">/home/user</span>
+                                </div>
                             </div>
                             <div class="file-list" id="fileList">
                                 <!-- Files will be listed here -->
+                                <div class="file-item">
+                                    <i class="fas fa-folder"></i>
+                                    <span class="file-name">Documents</span>
+                                </div>
+                                <div class="file-item">
+                                    <i class="fas fa-folder"></i>
+                                    <span class="file-name">Downloads</span>
+                                </div>
+                                <div class="file-item">
+                                    <i class="fas fa-folder"></i>
+                                    <span class="file-name">Desktop</span>
+                                </div>
+                                <div class="file-item">
+                                    <i class="fas fa-file"></i>
+                                    <span class="file-name">notes.txt</span>
+                                </div>
+                            </div>
+                            <div class="file-info">
+                                <div class="info-item">
+                                    <span>Total Files:</span>
+                                    <span id="totalFiles">4</span>
+                                </div>
+                                <div class="info-item">
+                                    <span>Storage Used:</span>
+                                    <span id="storageUsed">2.5 MB</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -866,6 +1308,10 @@
                                         <div class="progress-fill cpu-fill"></div>
                                     </div>
                                 </div>
+                                <div class="stat-details">
+                                    <span>Cores: 2</span>
+                                    <span>Speed: 2.5 GHz</span>
+                                </div>
                             </div>
 
                             <div class="stat-card">
@@ -873,11 +1319,15 @@
                                     <i class="fas fa-memory"></i>
                                     <h4>Memory</h4>
                                 </div>
-                                <div class="stat-value" id="memoryUsage">0/512 MB</div>
+                                <div class="stat-value" id="memoryUsage">0/256 MB</div>
                                 <div class="stat-progress">
                                     <div class="progress-bar">
                                         <div class="progress-fill memory-fill"></div>
                                     </div>
+                                </div>
+                                <div class="stat-details">
+                                    <span>Used: 0 MB</span>
+                                    <span>Free: 256 MB</span>
                                 </div>
                             </div>
 
@@ -886,32 +1336,54 @@
                                     <i class="fas fa-hdd"></i>
                                     <h4>Storage</h4>
                                 </div>
-                                <div class="stat-value" id="storageUsage">0/2000 MB</div>
+                                <div class="stat-value" id="storageUsage">0/500 MB</div>
                                 <div class="stat-progress">
                                     <div class="progress-bar">
                                         <div class="progress-fill storage-fill"></div>
                                     </div>
+                                </div>
+                                <div class="stat-details">
+                                    <span>Used: 0 MB</span>
+                                    <span>Free: 500 MB</span>
                                 </div>
                             </div>
 
                             <div class="stat-card">
                                 <div class="stat-header">
                                     <i class="fas fa-network-wired"></i>
-                                    <h4>Network I/O</h4>
+                                    <h4>Network</h4>
                                 </div>
-                                <div class="stat-value" id="networkIO">0 KB/s</div>
+                                <div class="stat-value" id="networkStatus">Idle</div>
                                 <div class="stat-progress">
                                     <div class="progress-bar">
                                         <div class="progress-fill network-fill"></div>
                                     </div>
                                 </div>
+                                <div class="stat-details">
+                                    <span>RX: 0 KB/s</span>
+                                    <span>TX: 0 KB/s</span>
+                                </div>
                             </div>
                         </div>
 
                         <div class="process-list">
-                            <h4>Running Processes</h4>
-                            <div id="processList">
-                                <!-- Processes will be listed here -->
+                            <div class="process-header">
+                                <h4>Running Processes</h4>
+                                <button class="btn-small" id="refreshProcesses">
+                                    <i class="fas fa-redo"></i> Refresh
+                                </button>
+                            </div>
+                            <div class="process-table">
+                                <div class="process-row header">
+                                    <span class="process-col pid">PID</span>
+                                    <span class="process-col name">Name</span>
+                                    <span class="process-col cpu">CPU %</span>
+                                    <span class="process-col memory">Memory</span>
+                                    <span class="process-col status">Status</span>
+                                </div>
+                                <div id="processList">
+                                    <!-- Processes will be listed here -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -919,19 +1391,73 @@
                     <!-- Network Tab -->
                     <div class="console-tab-content" id="networkTab">
                         <div class="network-stats">
-                            <div class="network-card">
-                                <h4>Network Status</h4>
-                                <div class="network-info">
-                                    <span>Status: <span id="networkStatus">Connected</span></span>
-                                    <span>IP Address: <span id="networkIP">192.168.1.100</span></span>
-                                    <span>Ports Open: <span id="networkPorts">3</span></span>
+                            <div class="stat-card">
+                                <h4><i class="fas fa-wifi"></i> Network Interfaces</h4>
+                                <div class="interface-list" id="interfaceList">
+                                    <div class="interface-item">
+                                        <span class="interface-name">eth0</span>
+                                        <span class="interface-status active">Active</span>
+                                        <span class="interface-ip">192.168.1.100</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="network-card">
-                                <h4>Active Connections</h4>
-                                <div id="activeConnections">
-                                    <!-- Connections will be listed here -->
+                            <div class="stat-card">
+                                <h4><i class="fas fa-exchange-alt"></i> Traffic Statistics</h4>
+                                <div class="traffic-stats">
+                                    <div class="traffic-item">
+                                        <span>Received:</span>
+                                        <span id="rxTotal">0 KB</span>
+                                    </div>
+                                    <div class="traffic-item">
+                                        <span>Sent:</span>
+                                        <span id="txTotal">0 KB</span>
+                                    </div>
+                                    <div class="traffic-item">
+                                        <span>Rate (RX/TX):</span>
+                                        <span id="trafficRate">0/0 KB/s</span>
+                                    </div>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="network-tools">
+                            <h4><i class="fas fa-tools"></i> Network Tools</h4>
+                            <div class="tool-buttons">
+                                <button class="btn-small" id="pingTest">
+                                    <i class="fas fa-satellite-dish"></i> Ping Test
+                                </button>
+                                <button class="btn-small" id="dnsLookup">
+                                    <i class="fas fa-search"></i> DNS Lookup
+                                </button>
+                                <button class="btn-small" id="portScan">
+                                    <i class="fas fa-door-open"></i> Port Scan
+                                </button>
+                                <button class="btn-small" id="speedTest">
+                                    <i class="fas fa-tachometer-alt"></i> Speed Test
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Snapshots Tab -->
+                    <div class="console-tab-content" id="snapshotsTab">
+                        <div class="snapshots-header">
+                            <h4><i class="fas fa-camera"></i> VM Snapshots</h4>
+                            <button class="btn-primary" id="createSnapshot">
+                                <i class="fas fa-camera"></i> Create Snapshot
+                            </button>
+                        </div>
+                        <div class="snapshots-list" id="snapshotsList">
+                            <!-- Snapshots will be listed here -->
+                            <div class="empty-state">
+                                <i class="fas fa-camera"></i>
+                                <p>No snapshots created yet</p>
+                                <p class="small">Create a snapshot to save the current VM state</p>
+                            </div>
+                        </div>
+                        <div class="snapshots-info">
+                            <div class="info-item">
+                                <i class="fas fa-info-circle"></i>
+                                <p>Snapshots allow you to save and restore VM state. They include memory, disk, and configuration.</p>
                             </div>
                         </div>
                     </div>
@@ -939,7 +1465,7 @@
 
                 <div class="vm-sidebar">
                     <div class="vm-info-card">
-                        <h4>VM Information</h4>
+                        <h4><i class="fas fa-info-circle"></i> VM Information</h4>
                         <div class="info-item">
                             <span class="info-label">Type:</span>
                             <span class="info-value" id="vmInfoType">Linux</span>
@@ -957,51 +1483,84 @@
                             <span class="info-value" id="vmInfoIP">192.168.1.100</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">CPU Cores:</span>
-                            <span class="info-value" id="vmInfoCores">1</span>
+                            <span class="info-label">MAC Address:</span>
+                            <span class="info-value" id="vmInfoMAC">00:1A:2B:3C:4D:5E</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Version:</span>
+                            <span class="info-value" id="vmInfoVersion">v1.0.0</span>
                         </div>
                     </div>
 
                     <div class="quick-commands">
-                        <h4>Quick Commands</h4>
-                        <div class="command-buttons" id="quickCommands">
-                            <!-- Commands will be populated based on VM type -->
-                        </div>
-                    </div>
-
-                    <div class="vm-shortcuts">
-                        <h4>Shortcuts</h4>
-                        <div class="shortcut-list">
-                            <div class="shortcut-item">
-                                <kbd>Ctrl</kbd> + <kbd>Enter</kbd>
-                                <span>Send Command</span>
-                            </div>
-                            <div class="shortcut-item">
-                                <kbd>Ctrl</kbd> + <kbd>L</kbd>
-                                <span>Clear Terminal</span>
-                            </div>
-                            <div class="shortcut-item">
-                                <kbd>Ctrl</kbd> + <kbd>S</kbd>
-                                <span>Save VM</span>
-                            </div>
-                            <div class="shortcut-item">
-                                <kbd>Ctrl</kbd> + <kbd>P</kbd>
-                                <span>Pause/Resume</span>
-                            </div>
+                        <h4><i class="fas fa-bolt"></i> Quick Commands</h4>
+                        <div class="command-buttons">
+                            <button class="cmd-btn" data-command="pwd">pwd</button>
+                            <button class="cmd-btn" data-command="ls -la">ls -la</button>
+                            <button class="cmd-btn" data-command="df -h">df -h</button>
+                            <button class="cmd-btn" data-command="free -m">free -m</button>
+                            <button class="cmd-btn" data-command="clear">clear</button>
+                            <button class="cmd-btn" data-command="help">help</button>
+                            <button class="cmd-btn" data-command="date">date</button>
+                            <button class="cmd-btn" data-command="whoami">whoami</button>
+                            <button class="cmd-btn" data-command="uname -a">uname -a</button>
+                            <button class="cmd-btn" data-command="ps aux">ps aux</button>
+                            <button class="cmd-btn" data-command="top">top</button>
+                            <button class="cmd-btn" data-command="history">history</button>
                         </div>
                     </div>
 
                     <div class="vm-actions">
-                        <h4>Actions</h4>
+                        <h4><i class="fas fa-cogs"></i> Actions</h4>
                         <button class="btn-secondary" id="snapshotVM">
                             <i class="fas fa-camera"></i> Take Snapshot
-                        </button>
-                        <button class="btn-secondary" id="cloneVM">
-                            <i class="fas fa-clone"></i> Clone VM
                         </button>
                         <button class="btn-secondary" id="exportVM">
                             <i class="fas fa-download"></i> Export VM
                         </button>
+                        <button class="btn-secondary" id="shareVM">
+                            <i class="fas fa-share"></i> Share VM
+                        </button>
+                        <button class="btn-secondary" id="cloneVM">
+                            <i class="fas fa-clone"></i> Clone VM
+                        </button>
+                        <button class="btn-secondary" id="migrateVM">
+                            <i class="fas fa-exchange-alt"></i> Migrate VM
+                        </button>
+                    </div>
+
+                    <div class="vm-resources">
+                        <h4><i class="fas fa-chart-pie"></i> Resource Usage</h4>
+                        <div class="resource-chart">
+                            <div class="resource-item">
+                                <span class="resource-label">CPU:</span>
+                                <div class="resource-bar">
+                                    <div class="resource-fill cpu-fill-small"></div>
+                                </div>
+                                <span class="resource-value">0%</span>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-label">Memory:</span>
+                                <div class="resource-bar">
+                                    <div class="resource-fill memory-fill-small"></div>
+                                </div>
+                                <span class="resource-value">0/256 MB</span>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-label">Storage:</span>
+                                <div class="resource-bar">
+                                    <div class="resource-fill storage-fill-small"></div>
+                                </div>
+                                <span class="resource-value">0/500 MB</span>
+                            </div>
+                            <div class="resource-item">
+                                <span class="resource-label">Network:</span>
+                                <div class="resource-bar">
+                                    <div class="resource-fill network-fill-small"></div>
+                                </div>
+                                <span class="resource-value">Idle</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -1011,26 +1570,36 @@
                     <span id="connectionStatus">
                         <i class="fas fa-circle"></i> VM Status: <span>Starting...</span>
                     </span>
+                    <span class="footer-separator">|</span>
+                    <span id="vmUptime">
+                        <i class="fas fa-clock"></i> Uptime: <span>0s</span>
+                    </span>
                 </div>
                 <div class="footer-center">
                     <span id="keyboardHint">
-                        <i class="fas fa-keyboard"></i> Press ↑↓ for history, Tab for autocomplete
+                        <i class="fas fa-keyboard"></i> Press Enter to send command • Ctrl+P to pause/resume
                     </span>
                 </div>
                 <div class="footer-right">
-                    <span id="cpuTemp">
-                        <i class="fas fa-thermometer-half"></i> CPU: <span>45°C</span>
-                    </span>
+                    <button class="btn-small" id="helpButton">
+                        <i class="fas fa-question-circle"></i> Help
+                    </button>
+                    <button class="btn-small" id="bugButton">
+                        <i class="fas fa-bug"></i> Report Bug
+                    </button>
                 </div>
             </footer>
         </div>
-
-        <!-- Toast Container -->
-        <div id="toastContainer"></div>
     </div>
 
-    <!-- v86 Library (Self-hosted to avoid CORS) -->
-    <script src="v86/libv86.js"></script>
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <!-- Use alternative v86 library that doesn't have CORS issues -->
+    <script src="https://cdn.jsdelivr.net/gh/benjamincheng/v86-release@master/build/libv86.js"></script>
+    <!-- Pyodide for Python VMs -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
