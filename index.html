@@ -385,7 +385,7 @@
                     <div class="creation-step active" id="step1">
                         <h3>Select VM Type</h3>
                         <div class="type-selection">
-                            <div class="type-option" data-type="linux">
+                            <div class="type-option active" data-type="linux">
                                 <div class="type-icon">
                                     <i class="fab fa-linux"></i>
                                 </div>
@@ -435,7 +435,7 @@
                                 <input type="text" id="vmName" placeholder="my-vm" value="my-vm-1">
                             </div>
 
-                            <div id="linuxConfig" class="vm-config-section">
+                            <div id="linuxConfig" class="vm-config-section active">
                                 <div class="form-group">
                                     <label for="linuxDistro">Distribution</label>
                                     <select id="linuxDistro">
@@ -535,7 +535,7 @@
                             </div>
                             <div class="review-item">
                                 <span class="review-label">Configuration:</span>
-                                <span class="review-value" id="reviewConfig">Debian 11</span>
+                                <span class="review-value" id="reviewConfig">Alpine Linux (5MB)</span>
                             </div>
                         </div>
                     </div>
@@ -608,7 +608,7 @@
                         <div class="terminal-input">
                             <span class="prompt">$ </span>
                             <input type="text" id="terminalInput" autocomplete="off" 
-                                   placeholder="Type a command..." disabled>
+                                   placeholder="Type a command...">
                             <button class="btn-small" id="sendCommand">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
@@ -793,7 +793,9 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/@copy/v86@latest/build/libv86.js"></script>
+    <!-- Use correct v86 library from copy.sh -->
+    <script src="https://copy.sh/v86/build/libv86.js"></script>
+    <!-- Pyodide for Python VMs -->
     <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
     <script src="script.js"></script>
 </body>
