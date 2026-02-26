@@ -27,11 +27,7 @@ class VMApp {
 
     async init() {
         console.log("VMApp initializing...");
-        
-        // Show loading screen immediately
         this.showScreen('loading');
-        
-        // Start initialization sequence
         this.initializeApp();
     }
 
@@ -39,25 +35,13 @@ class VMApp {
         try {
             console.log("Starting app initialization...");
             
-            // Initialize components without waiting for heavy dependencies
             this.vmManager = new VMManager(this);
-            
-            // Load saved data
             this.loadSavedData();
-            
-            // Setup range inputs immediately
-            this.setupRangeInputs();
-            
-            // Bind events immediately (don't wait for everything)
+            this.setupRangeInputs();        // Now includes all settings ranges
             this.bindEvents();
-            
-            // Update dashboard stats
             this.updateDashboardStats();
-            
-            // Start Pyodide loading in background (non-blocking)
             this.loadPyodideInBackground();
             
-            // Simulate loading for user experience
             setTimeout(() => {
                 console.log("Loading complete, showing dashboard...");
                 this.initialized = true;
@@ -66,9 +50,7 @@ class VMApp {
             
         } catch (error) {
             console.error("Error during initialization:", error);
-            // Even if there's an error, show dashboard after delay
             setTimeout(() => {
-                console.log("Showing dashboard despite errors...");
                 this.showScreen('dashboard');
             }, 2000);
         }
@@ -90,15 +72,9 @@ class VMApp {
 
     showScreen(screenName) {
         console.log(`Showing screen: ${screenName}`);
-        
-        // Hide all screens
         Object.values(this.screens).forEach(screen => {
-            if (screen) {
-                screen.classList.remove('active');
-            }
+            if (screen) screen.classList.remove('active');
         });
-        
-        // Show target screen
         if (this.screens[screenName]) {
             this.screens[screenName].classList.add('active');
             this.currentScreen = screenName;
@@ -107,25 +83,15 @@ class VMApp {
 
     showView(viewName) {
         console.log(`Showing view: ${viewName}`);
-        
-        // Hide all views
         Object.values(this.views).forEach(view => {
-            if (view) {
-                view.classList.remove('active');
-            }
+            if (view) view.classList.remove('active');
         });
-        
-        // Update active nav item
         document.querySelectorAll('.nav-item').forEach(item => {
             item.classList.remove('active');
         });
-        
-        // Show target view
         if (this.views[viewName]) {
             this.views[viewName].classList.add('active');
             this.currentView = viewName;
-            
-            // Update active nav
             const navItem = document.querySelector(`[data-screen="${viewName}"]`);
             if (navItem) navItem.classList.add('active');
         }
@@ -134,7 +100,7 @@ class VMApp {
     bindEvents() {
         console.log("Binding events...");
         
-        // Navigation - use event delegation
+        // Navigation
         document.addEventListener('click', (e) => {
             const navItem = e.target.closest('.nav-item');
             if (navItem && navItem.dataset.screen) {
@@ -147,6 +113,10 @@ class VMApp {
         this.safeAddEventListener('createQuickVM', 'click', () => this.showVMCreation());
         this.safeAddEventListener('createFirstVM', 'click', () => this.showVMCreation());
         this.safeAddEventListener('createNewVM', 'click', () => this.showVMCreation());
+        this.safeAddEventListener('createFromList', 'click', () => this.showVMCreation());
+        this.safeAddEventListener('openTemplates', 'click', () => this.showView('templates'));
+        this.safeAddEventListener('importVM', 'click', () => this.importVM());
+        this.safeAddEventListener('settingsBtn', 'click', () => this.showView('settings'));
 
         // Back to dashboard
         this.safeAddEventListener('backToDashboard', 'click', () => {
@@ -184,6 +154,8 @@ class VMApp {
 
         this.safeAddEventListener('createVM', 'click', () => {
             this.createVMFromModal();
+            // Reset step to 1 for next time
+            currentStep = 1;
         });
 
         // Template buttons
@@ -198,6 +170,8 @@ class VMApp {
         this.safeAddEventListener('saveSettings', 'click', () => this.saveSettings());
         this.safeAddEventListener('themeSelect', 'change', (e) => this.setTheme(e.target.value));
         this.safeAddEventListener('resetSettings', 'click', () => this.resetSettings());
+        this.safeAddEventListener('exportSettings', 'click', () => this.exportSettings());
+        this.safeAddEventListener('importSettings', 'click', () => this.importSettings());
 
         // VM Screen controls
         this.safeAddEventListener('powerVM', 'click', () => this.toggleVMPower());
@@ -238,6 +212,7 @@ class VMApp {
         // Output controls
         this.safeAddEventListener('clearOutput', 'click', () => this.clearOutputLog());
         this.safeAddEventListener('copyOutput', 'click', () => this.copyOutputLog());
+        this.safeAddEventListener('exportLogs', 'click', () => this.exportLogs());
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
@@ -259,6 +234,15 @@ class VMApp {
             }
         });
 
+        // Advanced toggle in creation modal
+        this.safeAddEventListener('toggleAdvanced', 'click', (e) => {
+            e.preventDefault();
+            const adv = document.getElementById('advancedOptions');
+            if (adv) {
+                adv.style.display = adv.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+
         console.log("Events bound successfully");
     }
 
@@ -271,6 +255,237 @@ class VMApp {
         }
     }
 
+    // ========== SETTINGS ==========
+    setupRangeInputs() {
+        // Existing ranges
+        const ranges = [
+            { id: 'linuxRam', valueId: 'linuxRamValue' },
+            { id: 'linuxStorage', valueId: 'linuxStorageValue' },
+            { id: 'jsRam', valueId: 'jsRamValue' },
+            { id: 'pythonRam', valueId: 'pythonRamValue' }
+        ];
+        ranges.forEach(({ id, valueId }) => {
+            const range = document.getElementById(id);
+            const value = document.getElementById(valueId);
+            if (range && value) {
+                value.textContent = `${range.value} MB`;
+                range.addEventListener('input', (e) => {
+                    value.textContent = `${e.target.value} MB`;
+                });
+            }
+        });
+
+        // Settings ranges
+        const settingsRanges = [
+            { id: 'fontSize', valueId: 'fontSizeValue', suffix: 'px' },
+            { id: 'maxRam', valueId: 'maxRamValue', suffix: ' MB' },
+            { id: 'maxStorage', valueId: 'maxStorageValue', suffix: ' MB' },
+            { id: 'historyLimit', valueId: 'historyLimitValue', suffix: ' commands' },
+            { id: 'maxBackups', valueId: 'maxBackupsValue', suffix: ' files' }
+        ];
+        settingsRanges.forEach(({ id, valueId, suffix }) => {
+            const range = document.getElementById(id);
+            const value = document.getElementById(valueId);
+            if (range && value) {
+                value.textContent = range.value + suffix;
+                range.addEventListener('input', (e) => {
+                    value.textContent = e.target.value + suffix;
+                    if (id === 'fontSize') {
+                        document.documentElement.style.fontSize = e.target.value + 'px';
+                    }
+                });
+            }
+        });
+    }
+
+    saveSettings() {
+        const settings = {
+            theme: document.getElementById('themeSelect')?.value || 'dark',
+            fontSize: document.getElementById('fontSize')?.value || 14,
+            terminalTheme: document.getElementById('terminalTheme')?.value || 'default',
+            maxRam: document.getElementById('maxRam')?.value || 1024,
+            maxStorage: document.getElementById('maxStorage')?.value || 1000,
+            autoSave: document.getElementById('autoSave')?.checked || false,
+            hardwareAccel: document.getElementById('hardwareAccel')?.checked || true,
+            enableSandbox: document.getElementById('enableSandbox')?.checked || true,
+            clearConsole: document.getElementById('clearConsole')?.checked || true,
+            historyLimit: document.getElementById('historyLimit')?.value || 100,
+            autoComplete: document.getElementById('autoComplete')?.checked || true,
+            enableNetwork: document.getElementById('enableNetwork')?.checked || true,
+            proxySettings: document.getElementById('proxySettings')?.value || '',
+            dnsServer: document.getElementById('dnsServer')?.value || '8.8.8.8',
+            interfaceLanguage: document.getElementById('interfaceLanguage')?.value || 'en',
+            keyboardLayout: document.getElementById('keyboardLayout')?.value || 'us',
+            keyboardShortcuts: document.getElementById('keyboardShortcuts')?.checked || true,
+            backupInterval: document.getElementById('backupInterval')?.value || '15',
+            maxBackups: document.getElementById('maxBackups')?.value || 10
+        };
+        localStorage.setItem('vm_app_settings', JSON.stringify(settings));
+        this.showToast('Settings saved successfully', 'success');
+    }
+
+    resetSettings() {
+        if (confirm('Reset all settings to defaults?')) {
+            localStorage.removeItem('vm_app_settings');
+            // Reset form to defaults
+            const themeSelect = document.getElementById('themeSelect');
+            if (themeSelect) themeSelect.value = 'dark';
+            
+            const fontSize = document.getElementById('fontSize');
+            const fontSizeValue = document.getElementById('fontSizeValue');
+            if (fontSize && fontSizeValue) {
+                fontSize.value = 14;
+                fontSizeValue.textContent = '14px';
+                document.documentElement.style.fontSize = '14px';
+            }
+            
+            const terminalTheme = document.getElementById('terminalTheme');
+            if (terminalTheme) terminalTheme.value = 'default';
+            
+            const maxRam = document.getElementById('maxRam');
+            const maxRamValue = document.getElementById('maxRamValue');
+            if (maxRam && maxRamValue) {
+                maxRam.value = 1024;
+                maxRamValue.textContent = '1024 MB';
+            }
+            
+            const maxStorage = document.getElementById('maxStorage');
+            const maxStorageValue = document.getElementById('maxStorageValue');
+            if (maxStorage && maxStorageValue) {
+                maxStorage.value = 1000;
+                maxStorageValue.textContent = '1000 MB';
+            }
+            
+            const autoSave = document.getElementById('autoSave');
+            if (autoSave) autoSave.checked = false;
+            
+            const hardwareAccel = document.getElementById('hardwareAccel');
+            if (hardwareAccel) hardwareAccel.checked = true;
+            
+            const enableSandbox = document.getElementById('enableSandbox');
+            if (enableSandbox) enableSandbox.checked = true;
+            
+            const clearConsole = document.getElementById('clearConsole');
+            if (clearConsole) clearConsole.checked = true;
+            
+            const historyLimit = document.getElementById('historyLimit');
+            const historyLimitValue = document.getElementById('historyLimitValue');
+            if (historyLimit && historyLimitValue) {
+                historyLimit.value = 100;
+                historyLimitValue.textContent = '100 commands';
+            }
+            
+            const autoComplete = document.getElementById('autoComplete');
+            if (autoComplete) autoComplete.checked = true;
+            
+            const enableNetwork = document.getElementById('enableNetwork');
+            if (enableNetwork) enableNetwork.checked = true;
+            
+            const proxySettings = document.getElementById('proxySettings');
+            if (proxySettings) proxySettings.value = '';
+            
+            const dnsServer = document.getElementById('dnsServer');
+            if (dnsServer) dnsServer.value = '8.8.8.8';
+            
+            const interfaceLanguage = document.getElementById('interfaceLanguage');
+            if (interfaceLanguage) interfaceLanguage.value = 'en';
+            
+            const keyboardLayout = document.getElementById('keyboardLayout');
+            if (keyboardLayout) keyboardLayout.value = 'us';
+            
+            const keyboardShortcuts = document.getElementById('keyboardShortcuts');
+            if (keyboardShortcuts) keyboardShortcuts.checked = true;
+            
+            const backupInterval = document.getElementById('backupInterval');
+            if (backupInterval) backupInterval.value = '15';
+            
+            const maxBackups = document.getElementById('maxBackups');
+            const maxBackupsValue = document.getElementById('maxBackupsValue');
+            if (maxBackups && maxBackupsValue) {
+                maxBackups.value = 10;
+                maxBackupsValue.textContent = '10 files';
+            }
+            
+            this.setTheme('dark');
+            this.showToast('Settings reset to defaults', 'success');
+        }
+    }
+
+    exportSettings() {
+        const settings = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('vm_')) {
+                settings[key] = JSON.parse(localStorage.getItem(key));
+            }
+        }
+        const dataStr = JSON.stringify(settings, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `vm_backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showToast('Settings exported', 'success');
+    }
+
+    importSettings() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    // Clear existing VM data
+                    for (let key of Object.keys(localStorage)) {
+                        if (key.startsWith('vm_')) {
+                            localStorage.removeItem(key);
+                        }
+                    }
+                    // Save imported data
+                    for (let [key, value] of Object.entries(data)) {
+                        localStorage.setItem(key, JSON.stringify(value));
+                        if (key.startsWith('vm_')) {
+                            this.vmInstances.set(value.id, value);
+                        }
+                    }
+                    this.updateRecentVMs();
+                    this.updateVMList();
+                    this.updateDashboardStats();
+                    this.showToast('Settings imported successfully', 'success');
+                } catch (error) {
+                    this.showToast('Invalid backup file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+
+    // ========== VM DELETION ==========
+    deleteVM(vmId) {
+        if (confirm('Are you sure you want to delete this VM? This action cannot be undone.')) {
+            if (this.currentVM === vmId) {
+                this.stopCurrentVM();
+                this.showScreen('dashboard');
+            }
+            this.vmInstances.delete(vmId);
+            this.vmLogs.delete(vmId);
+            localStorage.removeItem(`vm_${vmId}`);
+            
+            this.updateRecentVMs();
+            this.updateVMList();
+            this.updateDashboardStats();
+            
+            this.showToast('VM deleted successfully', 'success');
+        }
+    }
+
+    // ========== VM CREATION ==========
     showVMCreation() {
         const modal = document.getElementById('vmCreationModal');
         if (modal) {
@@ -281,44 +496,34 @@ class VMApp {
     }
 
     selectVMType(type) {
-        // Update UI
         document.querySelectorAll('.type-option').forEach(option => {
             option.classList.remove('active');
         });
-        
         const selected = document.querySelector(`[data-type="${type}"]`);
         if (selected) selected.classList.add('active');
         
-        // Show appropriate config section
         document.querySelectorAll('.vm-config-section').forEach(section => {
             section.classList.remove('active');
         });
-        
         const configSection = document.getElementById(`${type}Config`);
         if (configSection) configSection.classList.add('active');
         
-        // Update review
         this.updateReview(type);
     }
 
     showCreationStep(step) {
-        // Update steps UI
         document.querySelectorAll('.step').forEach(stepEl => {
             stepEl.classList.remove('active');
         });
-        
         const stepEl = document.querySelector(`[data-step="${step}"]`);
         if (stepEl) stepEl.classList.add('active');
         
-        // Show/hide step content
         document.querySelectorAll('.creation-step').forEach(content => {
             content.classList.remove('active');
         });
-        
         const stepContent = document.getElementById(`step${step}`);
         if (stepContent) stepContent.classList.add('active');
         
-        // Update buttons
         const prevBtn = document.getElementById('prevStep');
         const nextBtn = document.getElementById('nextStep');
         const createBtn = document.getElementById('createVM');
@@ -327,7 +532,6 @@ class VMApp {
         if (nextBtn) nextBtn.style.display = step === 3 ? 'none' : 'flex';
         if (createBtn) createBtn.style.display = step === 3 ? 'flex' : 'none';
         
-        // Update review on step 3
         if (step === 3) {
             this.updateReview();
         }
@@ -349,14 +553,11 @@ class VMApp {
                 this.showToast('Please enter a VM name', 'warning');
                 return false;
             }
-            
-            // Check for duplicate names
             const existingVMs = Array.from(this.vmInstances.values());
             if (existingVMs.some(vm => vm.name === vmName)) {
                 this.showToast('A VM with this name already exists', 'warning');
                 return false;
             }
-            
             return true;
         }
         
@@ -430,7 +631,7 @@ class VMApp {
                 distro: document.getElementById('linuxDistro')?.value || 'alpine',
                 ram: parseInt(document.getElementById('linuxRam')?.value || '256'),
                 storage: parseInt(document.getElementById('linuxStorage')?.value || '500'),
-                network: true
+                network: document.getElementById('linuxNetwork')?.checked || true
             };
         } else {
             config = {
@@ -439,7 +640,6 @@ class VMApp {
                 ram: parseInt(document.getElementById(`${type}Ram`)?.value || '128')
             };
             
-            // Get packages if input exists
             const packagesInput = document.getElementById(`${type}Packages`);
             if (packagesInput) {
                 config.packages = packagesInput.value.split(',').map(p => p.trim()).filter(p => p);
@@ -712,18 +912,31 @@ class VMApp {
         });
     }
 
+    exportLogs() {
+        const vm = this.vmInstances.get(this.currentVM);
+        if (!vm) return;
+        const logs = this.vmLogs.get(this.currentVM) || [];
+        const dataStr = logs.map(l => `[${l.level}] ${l.timestamp}: ${l.message}`).join('\n');
+        const blob = new Blob([dataStr], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${vm.name}_logs_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showToast('Logs exported', 'success');
+    }
+
     switchConsoleTab(tabName) {
         document.querySelectorAll('.console-tab').forEach(tab => {
             tab.classList.remove('active');
         });
-        
         const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
         if (activeTab) activeTab.classList.add('active');
         
         document.querySelectorAll('.console-tab-content').forEach(content => {
             content.classList.remove('active');
         });
-        
         const activeContent = document.getElementById(`${tabName}Tab`);
         if (activeContent) activeContent.classList.add('active');
         
@@ -738,7 +951,6 @@ class VMApp {
         if (this.monitorInterval) {
             clearInterval(this.monitorInterval);
         }
-        
         this.monitorInterval = setInterval(() => {
             if (this.currentVM === vmId) {
                 this.updateVMMonitor(vmId);
@@ -784,7 +996,6 @@ class VMApp {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
-        
         if (hours > 0) return `${hours}h ${minutes}m`;
         if (minutes > 0) return `${minutes}m ${secs}s`;
         return `${secs}s`;
@@ -795,7 +1006,6 @@ class VMApp {
             this.showToast('No VM selected', 'warning');
             return;
         }
-        
         const vm = this.vmInstances.get(this.currentVM);
         if (vm.status === 'running' || vm.status === 'paused') {
             this.stopVM();
@@ -806,17 +1016,13 @@ class VMApp {
 
     async stopVM() {
         if (!this.currentVM) return;
-        
         this.updateVMStatus('stopping');
         this.addTerminalLine('Stopping virtual machine...', 'info');
-        
         try {
             await this.vmManager.stopVM(this.currentVM);
-            
             const vm = this.vmInstances.get(this.currentVM);
             vm.status = 'stopped';
             vm.paused = false;
-            
             this.updateVMStatus('stopped');
             this.addTerminalLine('Virtual machine stopped', 'info');
         } catch (error) {
@@ -827,9 +1033,7 @@ class VMApp {
 
     restartVM() {
         if (!this.currentVM) return;
-        
         this.addTerminalLine('Restarting virtual machine...', 'info');
-        
         setTimeout(() => {
             const vm = this.vmInstances.get(this.currentVM);
             this.startVM(vm);
@@ -838,9 +1042,7 @@ class VMApp {
 
     saveVMState() {
         if (!this.currentVM) return;
-        
         this.addTerminalLine('Saving VM state...', 'info');
-        
         setTimeout(() => {
             this.addTerminalLine('VM state saved successfully', 'success');
             this.showToast('VM state saved', 'success');
@@ -909,7 +1111,7 @@ class VMApp {
             </div>
         `).join('');
         
-        // Add event listeners dynamically
+        // Re-attach event listeners
         setTimeout(() => {
             document.querySelectorAll('.open-vm').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -926,7 +1128,7 @@ class VMApp {
             'python': 'python',
             'ruby': 'gem',
             'php': 'php',
-            'golang': 'go',
+            'golang': 'golang',
             'rust': 'rust',
             'java': 'java',
             'csharp': 'microsoft',
@@ -975,7 +1177,6 @@ class VMApp {
                     </button>
                 </div>
             `;
-            
             return;
         }
         
@@ -1011,14 +1212,13 @@ class VMApp {
             </div>
         `).join('');
         
-        // Add event listeners dynamically
+        // Re-attach event listeners
         setTimeout(() => {
             document.querySelectorAll('.open-vm').forEach(btn => {
                 btn.addEventListener('click', () => {
                     this.openVM(btn.dataset.vmId);
                 });
             });
-            
             document.querySelectorAll('.delete-vm').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1028,28 +1228,8 @@ class VMApp {
         }, 100);
     }
 
-    deleteVM(vmId) {
-        if (confirm('Are you sure you want to delete this VM? This action cannot be undone.')) {
-            if (this.currentVM === vmId) {
-                this.stopCurrentVM();
-                this.showScreen('dashboard');
-            }
-            
-            this.vmInstances.delete(vmId);
-            this.vmLogs.delete(vmId);
-            localStorage.removeItem(`vm_${vmId}`);
-            
-            this.updateRecentVMs();
-            this.updateVMList();
-            this.updateDashboardStats();
-            
-            this.showToast('VM deleted successfully', 'success');
-        }
-    }
-
     useTemplate(template) {
         let config;
-        
         switch(template) {
             case 'ubuntu':
                 config = {
@@ -1085,6 +1265,37 @@ class VMApp {
                     network: false
                 };
                 break;
+            case 'rails':
+                config = {
+                    type: 'ruby',
+                    version: '3.2',
+                    ram: 256,
+                    packages: ['rails']
+                };
+                break;
+            case 'laravel':
+                config = {
+                    type: 'php',
+                    version: '8.2',
+                    ram: 256,
+                    packages: ['laravel/installer']
+                };
+                break;
+            case 'goapi':
+                config = {
+                    type: 'golang',
+                    version: '1.20',
+                    ram: 128
+                };
+                break;
+            case 'spring':
+                config = {
+                    type: 'java',
+                    version: '17',
+                    ram: 512,
+                    packages: ['spring-boot']
+                };
+                break;
             default:
                 config = {
                     type: 'linux',
@@ -1094,103 +1305,41 @@ class VMApp {
                     network: true
                 };
         }
-        
         this.createVM(`${template}-vm`, config);
     }
 
-    saveSettings() {
-        const settings = {
-            theme: document.getElementById('themeSelect')?.value || 'dark',
-            fontSize: document.getElementById('fontSize')?.value || 14,
-            maxRam: document.getElementById('maxRam')?.value || 1024,
-            autoSave: document.getElementById('autoSave')?.checked || false,
-            enableSandbox: document.getElementById('enableSandbox')?.checked || false,
-            clearConsole: document.getElementById('clearConsole')?.checked || false
+    importVM() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    // Expecting a single VM object
+                    if (data.id && data.name && data.type && data.config) {
+                        // Ensure it doesn't conflict
+                        if (this.vmInstances.has(data.id)) {
+                            if (!confirm('A VM with this ID already exists. Overwrite?')) return;
+                        }
+                        this.vmInstances.set(data.id, data);
+                        localStorage.setItem(`vm_${data.id}`, JSON.stringify(data));
+                        this.updateRecentVMs();
+                        this.updateVMList();
+                        this.updateDashboardStats();
+                        this.showToast('VM imported successfully', 'success');
+                    } else {
+                        this.showToast('Invalid VM file', 'error');
+                    }
+                } catch (error) {
+                    this.showToast('Invalid file', 'error');
+                }
+            };
+            reader.readAsText(file);
         };
-        
-        localStorage.setItem('vm_app_settings', JSON.stringify(settings));
-        this.showToast('Settings saved successfully', 'success');
-    }
-
-    resetSettings() {
-        if (confirm('Reset all settings to defaults?')) {
-            localStorage.removeItem('vm_app_settings');
-            
-            const themeSelect = document.getElementById('themeSelect');
-            if (themeSelect) themeSelect.value = 'dark';
-            
-            const fontSize = document.getElementById('fontSize');
-            const fontSizeValue = document.getElementById('fontSizeValue');
-            if (fontSize && fontSizeValue) {
-                fontSize.value = 14;
-                fontSizeValue.textContent = '14px';
-                document.documentElement.style.fontSize = '14px';
-            }
-            
-            const maxRam = document.getElementById('maxRam');
-            const maxRamValue = document.getElementById('maxRamValue');
-            if (maxRam && maxRamValue) {
-                maxRam.value = 1024;
-                maxRamValue.textContent = '1024 MB';
-            }
-            
-            const autoSave = document.getElementById('autoSave');
-            if (autoSave) autoSave.checked = false;
-            
-            const enableSandbox = document.getElementById('enableSandbox');
-            if (enableSandbox) enableSandbox.checked = false;
-            
-            const clearConsole = document.getElementById('clearConsole');
-            if (clearConsole) clearConsole.checked = false;
-            
-            this.setTheme('dark');
-            this.showToast('Settings reset to defaults', 'success');
-        }
-    }
-
-    setupRangeInputs() {
-        const ranges = [
-            { id: 'linuxRam', valueId: 'linuxRamValue' },
-            { id: 'linuxStorage', valueId: 'linuxStorageValue' },
-            { id: 'jsRam', valueId: 'jsRamValue' },
-            { id: 'pythonRam', valueId: 'pythonRamValue' }
-        ];
-        
-        ranges.forEach(({ id, valueId }) => {
-            const range = document.getElementById(id);
-            const value = document.getElementById(valueId);
-            
-            if (range && value) {
-                // Set initial value
-                value.textContent = `${range.value} MB`;
-                
-                // Add event listener
-                range.addEventListener('input', (e) => {
-                    value.textContent = `${e.target.value} MB`;
-                });
-            }
-        });
-        
-        // Font size
-        const fontSize = document.getElementById('fontSize');
-        const fontSizeValue = document.getElementById('fontSizeValue');
-        if (fontSize && fontSizeValue) {
-            fontSizeValue.textContent = `${fontSize.value}px`;
-            fontSize.addEventListener('input', (e) => {
-                fontSizeValue.textContent = `${e.target.value}px`;
-                document.documentElement.style.fontSize = `${e.target.value}px`;
-            });
-        }
-        
-        // Max RAM
-        const maxRam = document.getElementById('maxRam');
-        const maxRamValue = document.getElementById('maxRamValue');
-        if (maxRam && maxRamValue) {
-            maxRamValue.textContent = `${maxRam.value} MB`;
-            maxRam.addEventListener('input', (e) => {
-                maxRamValue.textContent = `${e.target.value} MB`;
-            });
-        }
+        input.click();
     }
 
     loadSavedData() {
@@ -1211,6 +1360,9 @@ class VMApp {
                     document.documentElement.style.fontSize = `${settings.fontSize || 14}px`;
                 }
                 
+                const terminalTheme = document.getElementById('terminalTheme');
+                if (terminalTheme) terminalTheme.value = settings.terminalTheme || 'default';
+                
                 const maxRam = document.getElementById('maxRam');
                 const maxRamValue = document.getElementById('maxRamValue');
                 if (maxRam && maxRamValue) {
@@ -1218,14 +1370,62 @@ class VMApp {
                     maxRamValue.textContent = `${settings.maxRam || 1024} MB`;
                 }
                 
+                const maxStorage = document.getElementById('maxStorage');
+                const maxStorageValue = document.getElementById('maxStorageValue');
+                if (maxStorage && maxStorageValue) {
+                    maxStorage.value = settings.maxStorage || 1000;
+                    maxStorageValue.textContent = `${settings.maxStorage || 1000} MB`;
+                }
+                
                 const autoSave = document.getElementById('autoSave');
-                if (autoSave) autoSave.checked = settings.autoSave !== false;
+                if (autoSave) autoSave.checked = settings.autoSave || false;
+                
+                const hardwareAccel = document.getElementById('hardwareAccel');
+                if (hardwareAccel) hardwareAccel.checked = settings.hardwareAccel !== false;
                 
                 const enableSandbox = document.getElementById('enableSandbox');
                 if (enableSandbox) enableSandbox.checked = settings.enableSandbox !== false;
                 
                 const clearConsole = document.getElementById('clearConsole');
                 if (clearConsole) clearConsole.checked = settings.clearConsole !== false;
+                
+                const historyLimit = document.getElementById('historyLimit');
+                const historyLimitValue = document.getElementById('historyLimitValue');
+                if (historyLimit && historyLimitValue) {
+                    historyLimit.value = settings.historyLimit || 100;
+                    historyLimitValue.textContent = `${settings.historyLimit || 100} commands`;
+                }
+                
+                const autoComplete = document.getElementById('autoComplete');
+                if (autoComplete) autoComplete.checked = settings.autoComplete !== false;
+                
+                const enableNetwork = document.getElementById('enableNetwork');
+                if (enableNetwork) enableNetwork.checked = settings.enableNetwork !== false;
+                
+                const proxySettings = document.getElementById('proxySettings');
+                if (proxySettings) proxySettings.value = settings.proxySettings || '';
+                
+                const dnsServer = document.getElementById('dnsServer');
+                if (dnsServer) dnsServer.value = settings.dnsServer || '8.8.8.8';
+                
+                const interfaceLanguage = document.getElementById('interfaceLanguage');
+                if (interfaceLanguage) interfaceLanguage.value = settings.interfaceLanguage || 'en';
+                
+                const keyboardLayout = document.getElementById('keyboardLayout');
+                if (keyboardLayout) keyboardLayout.value = settings.keyboardLayout || 'us';
+                
+                const keyboardShortcuts = document.getElementById('keyboardShortcuts');
+                if (keyboardShortcuts) keyboardShortcuts.checked = settings.keyboardShortcuts !== false;
+                
+                const backupInterval = document.getElementById('backupInterval');
+                if (backupInterval) backupInterval.value = settings.backupInterval || '15';
+                
+                const maxBackups = document.getElementById('maxBackups');
+                const maxBackupsValue = document.getElementById('maxBackupsValue');
+                if (maxBackups && maxBackupsValue) {
+                    maxBackups.value = settings.maxBackups || 10;
+                    maxBackupsValue.textContent = `${settings.maxBackups || 10} files`;
+                }
                 
                 this.setTheme(settings.theme || 'dark');
             }
@@ -1243,7 +1443,6 @@ class VMApp {
                 }
             }
             
-            // Update UI
             this.updateRecentVMs();
             this.updateVMList();
             
@@ -1257,7 +1456,6 @@ class VMApp {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             theme = prefersDark ? 'dark' : 'light';
         }
-        
         document.documentElement.setAttribute('data-theme', theme);
     }
 
@@ -1278,29 +1476,14 @@ class VMApp {
     }
 
     showToast(message, type = 'info') {
-        // Remove existing toasts
         document.querySelectorAll('.toast').forEach(toast => toast.remove());
         
         const toast = document.createElement('div');
-        toast.className = `toast`;
-        toast.textContent = message;
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i> ${message}`;
         
-        // Add color based on type
-        switch(type) {
-            case 'success':
-                toast.style.borderLeftColor = 'var(--success-color)';
-                break;
-            case 'warning':
-                toast.style.borderLeftColor = 'var(--warning-color)';
-                break;
-            case 'error':
-                toast.style.borderLeftColor = 'var(--danger-color)';
-                break;
-            default:
-                toast.style.borderLeftColor = 'var(--info-color)';
-        }
-        
-        document.body.appendChild(toast);
+        const container = document.getElementById('toastContainer') || document.body;
+        container.appendChild(toast);
         
         setTimeout(() => {
             toast.remove();
@@ -1339,7 +1522,6 @@ class VMManager {
             case 'python':
                 return await this.createPythonVM(vm);
             default:
-                // For other types, create a basic VM
                 return await this.createBasicVM(vm);
         }
     }
@@ -1359,10 +1541,8 @@ class VMManager {
             currentDir: '/home/user',
             history: []
         };
-        
         this.app.addTerminalLine('Linux VM initialized (simulated environment)', 'info');
         this.app.addTerminalLine('Type "help" for available commands', 'info');
-        
         return linuxVM;
     }
 
@@ -1375,17 +1555,13 @@ class VMManager {
             modules: {},
             history: []
         };
-        
-        // Load packages if specified
         if (vm.config.packages && vm.config.packages.length > 0) {
             vm.config.packages.forEach(pkg => {
                 jsVM.modules[pkg] = `Module '${pkg}' loaded (simulated)`;
             });
         }
-        
         this.app.addTerminalLine(`JavaScript VM initialized (Node.js environment)`, 'info');
         this.app.addTerminalLine('Type JavaScript code to execute it', 'info');
-        
         return jsVM;
     }
 
@@ -1397,18 +1573,14 @@ class VMManager {
             modules: {},
             history: []
         };
-        
         if (window.pyodide) {
             pythonVM.pyodide = window.pyodide;
-            
             if (vm.config.packages && vm.config.packages.length > 0) {
                 this.app.logSystem(`Loading Python packages: ${vm.config.packages.join(', ')}`, 'info');
             }
         }
-        
         this.app.addTerminalLine(`Python VM initialized ${window.pyodide ? 'with Pyodide' : 'with basic interpreter'}`, 'info');
         this.app.addTerminalLine('Type Python code to execute it', 'info');
-        
         return pythonVM;
     }
 
@@ -1419,10 +1591,8 @@ class VMManager {
             variables: {},
             history: []
         };
-        
         this.app.addTerminalLine(`${this.getVMTypeName(vm.type)} initialized`, 'info');
         this.app.addTerminalLine('Type commands to interact with the VM', 'info');
-        
         return basicVM;
     }
 
@@ -1509,7 +1679,6 @@ class VMManager {
                 exit: (code) => this.app.logSystem(`Process exited with code ${code}`, 'info')
             }
         };
-        
         return new Proxy(sandbox, {
             has: () => true,
             get: (target, prop) => {
@@ -1527,7 +1696,6 @@ class VMManager {
             return { success: false, error: 'VM not found' };
         }
         
-        // Add to history
         vmData.history = vmData.history || [];
         vmData.history.push(command);
         if (vmData.history.length > 100) {
@@ -1535,7 +1703,6 @@ class VMManager {
         }
         
         try {
-            // Handle special commands first
             if (command === 'clear') {
                 this.app.clearTerminal();
                 return { success: true };
@@ -1546,7 +1713,6 @@ class VMManager {
                 return { success: true, output: helpText };
             }
             
-            // Process based on VM type
             return await this.processVMCommand(vmData, command);
         } catch (error) {
             return { success: false, error: error.message };
@@ -1626,7 +1792,6 @@ Available Commands:
         const parts = command.trim().split(/\s+/);
         const cmd = parts[0].toLowerCase();
         
-        // Handle common Linux commands
         const commands = {
             'echo': () => parts.slice(1).join(' '),
             'date': () => new Date().toString(),
@@ -1734,7 +1899,6 @@ Available Commands:
         const sandbox = vmData.context;
         
         try {
-            // Special handling for console commands
             if (command.trim().startsWith('console.')) {
                 try {
                     const fn = new Function('sandbox', `
@@ -1743,16 +1907,14 @@ Available Commands:
                         }
                     `);
                     const result = fn(sandbox);
-                    
                     if (result !== undefined) {
                         return { success: true };
                     }
                 } catch (e) {
-                    // Fall through
+                    // fall through
                 }
             }
             
-            // Try as expression
             try {
                 const fn = new Function('sandbox', `
                     with(sandbox) {
@@ -1760,17 +1922,14 @@ Available Commands:
                     }
                 `);
                 const result = fn(sandbox);
-                
                 if (result !== undefined) {
                     const output = typeof result === 'object' 
                         ? JSON.stringify(result, null, 2) 
                         : String(result);
                     return { success: true, output: output };
                 }
-                
                 return { success: true };
             } catch (evalError) {
-                // Try as statement
                 try {
                     const fn = new Function('sandbox', `
                         with(sandbox) {
@@ -1791,7 +1950,6 @@ Available Commands:
     async processPythonCommand(vmData, command) {
         try {
             let result;
-            
             if (vmData.pyodide) {
                 try {
                     result = await vmData.pyodide.runPythonAsync(command);
@@ -1799,14 +1957,11 @@ Available Commands:
                     return { success: false, error: pyodideError.message };
                 }
             } else {
-                // Basic Python interpreter
                 result = this.processBasicPython(command);
             }
-            
             if (result !== undefined && result !== null) {
                 return { success: true, output: String(result) };
             }
-            
             return { success: true };
         } catch (error) {
             return { success: false, error: error.message };
@@ -1816,10 +1971,8 @@ Available Commands:
     processBasicPython(code) {
         const lines = code.split('\n');
         let result = '';
-        
         for (const line of lines) {
             const trimmed = line.trim();
-            
             if (trimmed.startsWith('print(') && trimmed.endsWith(')')) {
                 const content = trimmed.substring(6, trimmed.length - 1);
                 try {
@@ -1836,19 +1989,16 @@ Available Commands:
                         result += String(evalResult) + '\n';
                     }
                 } catch (e) {
-                    // Ignore eval errors
+                    // ignore
                 }
             }
         }
-        
         return result.trim() || undefined;
     }
 
     async processBasicCommand(vmData, command) {
-        // Basic command processing for other VM types
         const parts = command.trim().split(/\s+/);
         const cmd = parts[0].toLowerCase();
-        
         const basicCommands = {
             'echo': () => parts.slice(1).join(' '),
             'date': () => new Date().toString(),
@@ -1856,28 +2006,23 @@ Available Commands:
             'help': () => this.getHelpText(vmData.type),
             'history': () => vmData.history.join('\n')
         };
-        
         if (basicCommands[cmd]) {
             const output = basicCommands[cmd]();
             return { success: true, output: output };
         }
-        
         return { success: true, output: `Command executed in ${vmData.type} VM: ${command}` };
     }
 
     stopVM(vmId) {
         const vmData = this.vms.get(vmId);
         if (!vmData) return;
-        
         this.vms.delete(vmId);
-        
         const vm = vmData.vm;
         if (vm) {
             vm.status = 'stopped';
             vm.paused = false;
             this.app.saveVMData(vm);
         }
-        
         this.app.logSystem('VM stopped', 'info');
     }
 }
@@ -1888,7 +2033,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.vmApp = new VMApp();
 });
 
-// Add error handling for any uncaught errors
 window.addEventListener('error', (event) => {
     console.error('Uncaught error:', event.error);
 });
